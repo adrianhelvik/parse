@@ -1,4 +1,5 @@
 import JSON from 'circular-json'
+import assert from 'assert'
 
 function convertSyntax(syntax) {
   const rulesMap = new Map()
@@ -55,8 +56,15 @@ function convertSyntax(syntax) {
 
     if (rule.ruleType === 'sequence' || rule.ruleType === 'either') {
       const subRule = []
-      for (const subRuleType of subRuleSchema)
-        subRule.push(rulesMap.get(subRuleType))
+      for (const subRuleType of subRuleSchema) {
+        const subSubRule = rulesMap.get(subRuleType)
+        assert(
+          subSubRule,
+          `Could not resolve ${subRuleType} in schema `
+          + JSON.stringify(syntax.parse[type] || syntax.lex[type])
+        )
+        subRule.push(subSubRule)
+      }
       rule.subRule = subRule
     } else {
       const subRule = rulesMap.get(subRuleSchema)
