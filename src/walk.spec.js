@@ -27,7 +27,7 @@ it('can walk nodes', () => {
   const source = 'foo bar baz'
   const tokens = lex({ source, syntax })
 
-  const { node } = parse({
+  const node = parse({
     source,
     syntax,
     tokens,

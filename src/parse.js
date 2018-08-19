@@ -60,19 +60,14 @@ function parse({
 
   if (nodes) {
     return {
-      incrementIndex,
-      node: {
-        type: rule.type,
-        nodes,
-      }
+      type: rule.type,
+      nodes,
     }
   }
+
   return {
-    incrementIndex,
-    node: {
-      type: rule.type,
-      node,
-    }
+    type: rule.type,
+    node,
   }
 }
 

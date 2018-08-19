@@ -26,13 +26,11 @@ it('can parse lex types', () => {
   const source = 'foo bar baz'
   const tokens = lex({ source, syntax })
 
-  const { node, incrementIndex } = parse({
+  const node = parse({
     source,
     syntax,
     tokens,
   })
-
-  expect(incrementIndex).toBe(tokens.length)
 
   expect(node).toEqual({
     type: 'main',
