@@ -1,6 +1,6 @@
 {
-  "name": "@adrianhelvik/syntax",
-  "version": "1.3.0",
+  "name": "@adrianhelvik/parse",
+  "version": "1.0.0",
   "main": "dist/index.js",
   "license": "MIT",
   "private": false,
