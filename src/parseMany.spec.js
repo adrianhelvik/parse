@@ -40,7 +40,6 @@ it('can parse many sequence types', () => {
       {
         type: 'ident',
         ruleType: 'lex',
-        value: 'foo',
       },
       {
         type: 'symbol',
@@ -50,23 +49,24 @@ it('can parse many sequence types', () => {
       {
         type: 'ident',
         ruleType: 'lex',
-        value: 'bar',
       }
     ]
   }
 
   const source = 'foo = bar bar = baz'
+  //              0   4 6   10  1416
 
   const tokens = [
-    { type: 'ident', value: 'foo' },
-    { type: 'symbol', value: '=' },
-    { type: 'ident', value: 'bar' },
-    { type: 'ident', value: 'bar' },
-    { type: 'symbol', value: '=' },
-    { type: 'ident', value: 'baz' },
+    { type: 'ident', value: 'foo', index: 0 },
+    { type: 'symbol', value: '=', index: 4 },
+    { type: 'ident', value: 'bar', index: 6 },
+    { type: 'ident', value: 'bar', index: 10 },
+    { type: 'symbol', value: '=', index: 14 },
+    { type: 'ident', value: 'baz', index: 16 },
   ]
 
   const { nodes, incrementIndex } = parseMany({
+    shouldThrow: true,
     index: 0,
     source,
     tokens,
@@ -75,14 +75,14 @@ it('can parse many sequence types', () => {
 
   expect(nodes).toEqual([
     { type: 'assignment', nodes: [
-      { type: 'ident', value: 'foo' },
-      { type: 'symbol', value: '=' },
-      { type: 'ident', value: 'bar' },
+      { type: 'ident', value: 'foo', index: 0 },
+      { type: 'symbol', value: '=', index: 4 },
+      { type: 'ident', value: 'bar', index: 6 },
     ] },
     { type: 'assignment', nodes: [
-      { type: 'ident', value: 'bar' },
-      { type: 'symbol', value: '=' },
-      { type: 'ident', value: 'baz' },
+      { type: 'ident', value: 'bar', index: 10 },
+      { type: 'symbol', value: '=', index: 14 },
+      { type: 'ident', value: 'baz', index: 16 },
     ] },
   ])
 

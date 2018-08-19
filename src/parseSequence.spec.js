@@ -154,3 +154,44 @@ it('can specify an optional rule', () => {
 
   expect(incrementIndex).toBe(2)
 })
+
+it('throws when you are outside the token range', () => {
+  const source = '123'
+  const rule = [
+    { ruleType: 'lex', type: 'notHere' },
+  ]
+  const tokens = [
+    { type: 'one', value: '1', index: 0 },
+    { type: 'two', value: '2', index: 1 },
+    { type: 'three', value: '3', index: 2 },
+  ]
+
+  expect(() => parseSequence({
+    shouldThrow: true,
+    index: 3,
+    source,
+    tokens,
+    rule,
+  })).toThrow('Expected notHere, but reached the end of the source.')
+})
+
+it('throws when shouldThrow is true and no match was found', () => {
+  const source = '123'
+  const rule = [
+    { ruleType: 'lex', type: 'notHere' },
+  ]
+  const tokens = [
+    { type: 'one', value: '1', index: 0 },
+    { type: 'two', value: '2', index: 1 },
+    { type: 'three', value: '3', index: 2 },
+  ]
+
+  expect(() => parseSequence({
+    shouldThrow: true,
+    index: 0,
+    source,
+    tokens,
+    rule,
+    type: 'foobar',
+  })).toThrow('Expected notHere, but got one while parsing foobar.')
+})

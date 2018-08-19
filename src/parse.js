@@ -23,6 +23,7 @@ function parse({
         tokens,
         syntax,
         rule: rule.subRule,
+        shouldThrow: true,
       })
       break
     case 'either':
@@ -32,6 +33,7 @@ function parse({
         tokens,
         syntax,
         rule: rule.subRule,
+        shouldThrow: true,
       })
       break
     case 'sequence':
@@ -41,6 +43,7 @@ function parse({
         tokens,
         syntax,
         rule: rule.subRule,
+        shouldThrow: true,
       })
       break
     default:

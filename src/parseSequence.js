@@ -1,29 +1,56 @@
+import trace from '@adrianhelvik/trace'
 import parseEither from './parseEither'
 import JSON from 'circular-json'
 
 function parseSequence({
+  shouldThrow,
   index = 0,
   source,
   tokens,
   rule,
+  type,
 }) {
   const nodes = []
   let incrementIndex = 0
 
   for (let i = 0; i < rule.length; i++) {
-    if (i + index > tokens.length)
+    if (index + incrementIndex >= tokens.length) {
+      if (shouldThrow && shouldThrow !== 'not eof') {
+        throw Error(trace(source, source.length,
+          `Expected ${rule[i].type}, but reached the end of the source.`
+        ))
+      }
       return null
+    }
 
     switch (rule[i].ruleType) {
       case 'lex':
         {
-          if (! tokens[index+incrementIndex])
-            return null
-          if (rule[i].type !== tokens[index+incrementIndex].type) {
-            if (! rule[i].optional)
+          const token = tokens[index+incrementIndex]
+
+          if (
+            rule[i].type !== token.type
+            || (
+              rule[i].value &&
+              rule[i].value !== token.value
+            )
+          ) {
+            if (! rule[i].optional) {
+              if (shouldThrow) {
+                const message = 
+                  rule[i].value
+                  ? trace(source, token.index,
+                    `Expected ${rule[i].value}, but got ${token.value} while parsing ${type}.`
+                  )
+                  : trace(source, token.index,
+                    `Expected ${rule[i].type}, but got ${token.type} while parsing ${type}.`
+                  )
+                throw Error(message)
+              }
               return null
+            }
           } else {
-            nodes.push(tokens[index+incrementIndex])
+            nodes.push(token)
             incrementIndex += 1
           }
         }
@@ -46,10 +73,12 @@ function parseSequence({
       case 'either':
         {
           const parsed = parseEither({
+            shouldThrow,
             index: index + i,
             source,
             tokens,
             rule: rule[i].subRule,
+            type: rule[i].type,
           })
           if (! parsed)
             return null

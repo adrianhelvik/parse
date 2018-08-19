@@ -21,7 +21,7 @@
     "prepublishOnly": "npm run test && npm run build"
   },
   "dependencies": {
-    "@adrianhelvik/trace": "^2.0.0",
+    "@adrianhelvik/trace": "^3.0.0",
     "circular-json": "^0.5.5"
   },
   "jest": {

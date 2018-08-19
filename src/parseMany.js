@@ -4,6 +4,7 @@ import JSON from 'circular-json'
 import assert from 'assert'
 
 function parseMany({
+  shouldThrow,
   index = 0,
   source,
   tokens,
@@ -26,10 +27,12 @@ function parseMany({
         let match
         while (
           match = parseSequence({
+            shouldThrow: 'not eof',
             index: index+incrementIndex,
             source,
             rule: rule.subRule,
             tokens,
+            type: rule.type,
           })
         ) {
           nodes.push({
@@ -45,10 +48,12 @@ function parseMany({
         let match
         while (
           match = parseEither({
+            shouldThrow: 'not eof',
             index: index+incrementIndex,
             source,
             rule: rule.subRule,
             tokens,
+            type: rule.type,
           })
         ) {
           if (Array.isArray(match.nodes)) {
