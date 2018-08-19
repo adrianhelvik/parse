@@ -149,3 +149,123 @@ it('can parse many either types', () => {
 
   expect(incrementIndex).toBe(4)
 })
+
+it('can parse delimited types with trailing delimiter', () => {
+  const rule = {
+    type: 'keyword',
+    ruleType: 'either',
+    subRule: [
+      {
+        type: 'ident',
+        ruleType: 'lex',
+        value: 'import',
+      },
+      {
+        type: 'ident',
+        ruleType: 'lex',
+        value: 'export',
+      },
+      {
+        type: 'ident',
+        ruleType: 'lex',
+        value: 'with',
+      }
+    ],
+  }
+
+  const delimiter = {
+    type: 'symbol',
+    ruleType: 'lex',
+    value: ';',
+  }
+
+  const source = 'import;export;'
+
+  const tokens = [
+    { type: 'ident', value: 'import', index: 0 },
+    { type: 'symbol', value: ';', index: 6 },
+    { type: 'ident', value: 'export', index: 7 },
+    { type: 'symbol', value: ';', index: 13 },
+  ]
+
+  const { nodes, incrementIndex } = parseMany({
+    shouldThrow: true,
+    delimiter,
+    index: 0,
+    source,
+    tokens,
+    rule,
+  })
+
+  expect(nodes).toEqual([
+    {
+      type: 'keyword',
+      node: { type: 'ident', value: 'import', index: 0 },
+    },
+    { type: 'symbol', value: ';', index: 6 },
+    {
+      type: 'keyword',
+      node: { type: 'ident', value: 'export', index: 7 },
+    },
+    { type: 'symbol', value: ';', index: 13 },
+  ])
+})
+
+it('can parse delimited types without trailing delimiter', () => {
+  const rule = {
+    type: 'keyword',
+    ruleType: 'either',
+    subRule: [
+      {
+        type: 'ident',
+        ruleType: 'lex',
+        value: 'import',
+      },
+      {
+        type: 'ident',
+        ruleType: 'lex',
+        value: 'export',
+      },
+      {
+        type: 'ident',
+        ruleType: 'lex',
+        value: 'with',
+      }
+    ],
+  }
+
+  const delimiter = {
+    type: 'symbol',
+    ruleType: 'lex',
+    value: ';',
+  }
+
+  const source = 'import;export'
+
+  const tokens = [
+    { type: 'ident', value: 'import', index: 0 },
+    { type: 'symbol', value: ';', index: 6 },
+    { type: 'ident', value: 'export', index: 7 },
+  ]
+
+  const { nodes, incrementIndex } = parseMany({
+    shouldThrow: true,
+    delimiter,
+    index: 0,
+    source,
+    tokens,
+    rule,
+  })
+
+  expect(nodes).toEqual([
+    {
+      type: 'keyword',
+      node: { type: 'ident', value: 'import', index: 0 },
+    },
+    { type: 'symbol', value: ';', index: 6 },
+    {
+      type: 'keyword',
+      node: { type: 'ident', value: 'export', index: 7 },
+    },
+  ])
+})

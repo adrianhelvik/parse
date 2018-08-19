@@ -1,5 +1,6 @@
 import parseSequence from './parseSequence'
 import trace from '@adrianhelvik/trace'
+import parseLex from './parseLex'
 
 function parseEither({
   shouldThrow,
@@ -9,12 +10,14 @@ function parseEither({
   rule,
   type,
 }) {
+  if (isNaN(index)) throw Error('Got NaN as index')
+
   if (index >= tokens.length) {
     if (shouldThrow && shouldThrow !== 'not eof') {
       throw Error(trace(
         source,
         source.length,
-        `Expected ${orify(rule.map(r => r.type))}, ` +
+        `Expected ${orify(rule)}, ` +
         `but reached the end of the source.`
       ))
     }
@@ -25,10 +28,17 @@ function parseEither({
     switch (subRule.ruleType) {
       case 'lex':
         {
-          if (subRule.type === tokens[index].type) {
+          const match = parseLex({
+            index,
+            source,
+            tokens,
+            rule: subRule,
+            type,
+          })
+          if (match) {
             return {
-              node: tokens[index],
-              incrementIndex: 1,
+              node: match.node,
+              incrementIndex: match.incrementIndex,
             }
           }
         }
@@ -84,35 +94,45 @@ function parseEither({
     throw Error(trace(
       source,
       tokens[index].index,
-      `Expected ${orify(rule.map(r => r.type))} while parsing ${type}. Got ${tokens[index].type}.`
+      `Expected ${orify(rule, tokens[index])} while parsing ${type}. Got ${tokenString(tokens[index], rule)}.`
     ))
   }
-
-  if (shouldThrow)
-    throw Error('...')
 
   return null
 }
 
 export default parseEither
 
-function orify(array) {
-  if (array.length === 1)
-    return array[0]
+function orify(rule, token) {
+  if (rule.length === 1)
+    return ruleString(rule[0])
 
   const result = ['either']
 
-  result.push(array[0])
+  result.push(ruleString(rule[0], token))
 
-  for (let i = 1; i < array.length - 1; i++) {
-    result.push(',')
-    result.push(array[i])
+  for (let i = 1; i < rule.length - 1; i++) {
+    result[result.length-1] += ','
+    result.push(ruleString(rule[i], token))
   }
 
-  if (array.length > 1) {
+  if (rule.length > 1) {
     result.push('or')
-    result.push(array[array.length-1])
+    result.push(ruleString(rule[rule.length-1], token))
   }
 
   return result.join(' ')
+}
+
+function ruleString(rule, token) {
+  if (rule.value) {
+    if (token && token.value === rule.value)
+      return '"' + rule.value + `" of type ${rule.type}`
+    return '"' + rule.value + '"'
+  }
+  return rule.type
+}
+
+function tokenString(token, rule) {
+  return token.type + ' "' + token.value + '"'
 }

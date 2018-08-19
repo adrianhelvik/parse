@@ -118,3 +118,32 @@ describe('from ergolang', () => {
     }).toThrow(/many/)
   })
 })
+
+it('can have delimters for the many type', () => {
+  const syntax = {
+    lex: [
+      ['word', /^[a-zA-Z]+/],
+      ['whitespace', /^[\s]+/],
+      ['symbol', /^[,]/],
+    ],
+    parse: {
+      main: ['many', 'word', 'symbol:,']
+    }
+  }
+
+  const converted = convertSyntax(syntax)
+
+  expect(converted).toEqual({
+    type: 'main',
+    ruleType: 'many',
+    subRule: {
+      type: 'word',
+      ruleType: 'lex',
+    },
+    delimiter: {
+      ruleType: 'lex',
+      type: 'symbol',
+      value: ',',
+    }
+  })
+})

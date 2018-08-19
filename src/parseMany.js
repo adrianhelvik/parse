@@ -1,5 +1,6 @@
 import parseSequence from './parseSequence'
 import parseEither from './parseEither'
+import parseOne from './parseOne'
 import JSON from 'circular-json'
 import assert from 'assert'
 
@@ -9,6 +10,7 @@ function parseMany({
   source,
   tokens,
   rule,
+  delimiter,
 }) {
   const nodes = []
   let incrementIndex = 0
@@ -19,6 +21,20 @@ function parseMany({
         while (tokens[index+incrementIndex].type === rule.type) {
           nodes.push(tokens[index+incrementIndex])
           incrementIndex += 1
+          if (delimiter) {
+            const delimiterResult = parseOne({
+              index: index + incrementIndex,
+              source,
+              tokens,
+              rule: delimiter,
+            })
+            if (! delimiterResult)
+              break
+            else {
+              incrementIndex += delimiterResult.incrementIndex
+              nodes.push(delimiterResult.node)
+            }
+          }
         }
       }
       break
@@ -40,6 +56,20 @@ function parseMany({
             nodes: match.nodes,
           })
           incrementIndex += match.incrementIndex
+          if (delimiter) {
+            const delimiterResult = parseOne({
+              index: index + incrementIndex,
+              source,
+              tokens,
+              rule: delimiter,
+            })
+            if (! delimiterResult)
+              break
+            else {
+              incrementIndex += delimiterResult.incrementIndex
+              nodes.push(delimiterResult.node)
+            }
+          }
         }
       }
       break
@@ -67,7 +97,27 @@ function parseMany({
               node: match.node,
             })
           }
+
+          if (typeof match.incrementIndex !== 'number')
+            throw Error('Got non-numeric incrementIndex')
+          if (isNaN(match.incrementIndex))
+            throw Error('Got NaN incrementIndex')
+
           incrementIndex += match.incrementIndex
+          if (delimiter) {
+            const delimiterResult = parseOne({
+              index: index + incrementIndex,
+              source,
+              tokens,
+              rule: delimiter,
+            })
+            if (! delimiterResult)
+              break
+            else {
+              incrementIndex += delimiterResult.incrementIndex
+              nodes.push(delimiterResult.node)
+            }
+          }
         }
       }
       break

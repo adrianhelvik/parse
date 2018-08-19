@@ -4,6 +4,7 @@ import assert from 'assert'
 
 function convertSyntax(syntax) {
   const rulesMap = new Map()
+  const unresolvedDelimiters = []
   const unresolved = []
 
   for (const ruleSchema of syntax.lex) {
@@ -22,27 +23,37 @@ function convertSyntax(syntax) {
     }
     let subRuleSchema
 
-    for (const part of ruleSchema) {
-      if (part === 'sequence')
-        rule.ruleType = 'sequence'
-      else if (part === 'either')
-        rule.ruleType = 'either'
-      else if (part === 'many')
-        rule.ruleType = 'many'
-      else if (Array.isArray(part)) {
-        if (subRuleSchema)
-          throw Error('Attempted to overwrite subRuleSchema')
-        subRuleSchema = part
+    if (ruleSchema[0] === 'many') {
+      subRuleSchema = ruleSchema[1]
+      rule.ruleType = 'many'
+      if (ruleSchema.length >= 3) {
+        unresolvedDelimiters.push({
+          delimiter: ruleSchema[2],
+          rule,
+        })
       }
-      else if (typeof part === 'string') {
-        if (subRuleSchema)
-          throw Error('Attempted to overwrite subRuleSchema')
-        subRuleSchema = part
+    } else {
+      for (const part of ruleSchema) {
+        if (part === 'sequence')
+          rule.ruleType = 'sequence'
+        else if (part === 'either')
+          rule.ruleType = 'either'
+        else if (Array.isArray(part)) {
+          if (subRuleSchema)
+            throw Error('Attempted to overwrite existing subRuleSchema ' + JSON.stringify(subRuleSchema) + ' with ' + JSON.stringify(part))
+          subRuleSchema = part
+        }
+        else if (typeof part === 'string') {
+          if (subRuleSchema)
+            throw Error('Attempted to overwrite existing subRuleSchema ' + JSON.stringify(subRuleSchema) + ' with ' + JSON.stringify(part))
+          else
+            subRuleSchema = part
+        }
       }
     }
 
     if (rule.ruleType === 'many' && typeof subRuleSchema !== 'string') {
-      throw Error('Invalid many-rule. The correct format is ["many","someRule"]. Got: ' + JSON.stringify(syntax.parse[type]))
+      throw Error('Invalid many-rule. The correct format is [string, string, string?]. Got: ' + JSON.stringify(syntax.parse[type]))
     }
 
     rulesMap.set(type, rule)
@@ -78,6 +89,20 @@ function convertSyntax(syntax) {
       const subRule = rulesMap.get(subRuleSchema)
       rule.subRule = subRule
     }
+  }
+
+  for (const { delimiter, rule } of unresolvedDelimiters) {
+    const [type, value] = splitFirst(delimiter, ':')
+
+    const delimiterRule = rulesMap.get(type)
+
+    if (value)
+      rule.delimiter = {
+        ...delimiterRule,
+        value,
+      }
+    else
+      rule.delimiter = delimiterRule
   }
 
   return rulesMap.get('main')

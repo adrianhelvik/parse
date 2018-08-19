@@ -1,10 +1,5 @@
 import convertSyntax from './convertSyntax'
-import parseSequence from './parseSequence'
-import parseEither from './parseEither'
-import trace from '@adrianhelvik/trace'
-import parseMany from './parseMany'
-import JSON from 'circular-json'
-import assert from 'assert'
+import parseOne from './parseOne'
 
 function parse({
   index = 0,
@@ -13,48 +8,18 @@ function parse({
   syntax,
 }) {
   const rule = convertSyntax(syntax)
-  let result
-
-  switch (rule.ruleType) {
-    case 'many':
-      result = parseMany({
-        index,
-        source,
-        tokens,
-        syntax,
-        rule: rule.subRule,
-        shouldThrow: true,
-      })
-      break
-    case 'either':
-      result = parseEither({
-        index,
-        source,
-        tokens,
-        syntax,
-        rule: rule.subRule,
-        shouldThrow: true,
-      })
-      break
-    case 'sequence':
-      result = parseSequence({
-        index,
-        source,
-        tokens,
-        syntax,
-        rule: rule.subRule,
-        shouldThrow: true,
-      })
-      break
-    default:
-      throw Error(`Invalid rule type: ${rule.ruleType}`)
-  }
 
   const {
     incrementIndex,
     nodes,
     node,
-  } = result
+  } = parseOne({
+    index,
+    source,
+    tokens,
+    rule,
+    shouldThrow: true
+  })
 
   if (index+incrementIndex < tokens.length) {
     console.log(JSON.stringify(nodes || node, null, 2))
