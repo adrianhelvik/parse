@@ -1,3 +1,5 @@
+import JSON from 'circular-json'
+
 function convertSyntax(syntax) {
   const rulesMap = new Map()
   const unresolved = []
@@ -25,10 +27,20 @@ function convertSyntax(syntax) {
         rule.ruleType = 'either'
       else if (part === 'many')
         rule.ruleType = 'many'
-      else if (Array.isArray(part))
+      else if (Array.isArray(part)) {
+        if (subRuleSchema)
+          throw Error('Attempted to overwrite subRuleSchema')
         subRuleSchema = part
-      else if (typeof part === 'string')
+      }
+      else if (typeof part === 'string') {
+        if (subRuleSchema)
+          throw Error('Attempted to overwrite subRuleSchema')
         subRuleSchema = part
+      }
+    }
+
+    if (rule.ruleType === 'many' && typeof subRuleSchema !== 'string') {
+      throw Error('Invalid many-rule. The correct format is ["many","someRule"]. Got: ' + JSON.stringify(syntax.parse[type]))
     }
 
     rulesMap.set(type, rule)

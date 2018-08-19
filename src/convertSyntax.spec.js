@@ -50,3 +50,39 @@ it('converts the many type', () => {
     },
   })
 })
+
+describe('from ergolang', () => {
+  it('should catch this wrong usage', () => {
+    const syntax = {
+      lex: [
+        ['string', /^'((\\')|[^'])+'/],
+        ['whitespace', /^\s+/, 'ignore'],
+        ['keyword', /^(let)/],
+        ['ident', /^[a-zA-Z][a-zA-Z0-9]*/],
+        ['double', /^([1-9][0-9]*)?\.[0-9]+/],
+        ['integer', /^[1-9][0-9]*/],
+        ['symbol', /^[=\[\],()]/],
+      ],
+      parse: {
+        main: ['many', [
+          'statement',
+        ]],
+        statement: ['either', [
+          'funcCall',
+          'varDecl',
+        ]],
+        funcCall: ['sequence', [
+          'ident',
+          'expression',
+        ]],
+        expression: ['either', [
+          'ident',
+        ]],
+      }
+    }
+
+    expect(() => {
+      convertSyntax(syntax)
+    }).toThrow(/many/)
+  })
+})
