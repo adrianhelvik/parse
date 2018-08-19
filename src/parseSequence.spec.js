@@ -195,3 +195,53 @@ it('throws when shouldThrow is true and no match was found', () => {
     type: 'foobar',
   })).toThrow('Expected notHere, but got one while parsing foobar.')
 })
+
+it('handles many rules', () => {
+  const rule = [
+    {
+      ruleType: 'many',
+      type: 'wordList',
+      delimiter: {
+        ruleType: 'lex',
+        type: 'symbol',
+        value: ',',
+      },
+      subRule: {
+        type: 'word',
+        ruleType: 'lex',
+      }
+    }
+  ]
+
+  const source = 'foo, bar, baz'
+
+  const tokens = [
+    { type: 'word', value: 'foo', index: 0 },
+    { type: 'symbol', value: ',', index: 3 },
+    { type: 'word', value: 'bar', index: 5 },
+    { type: 'symbol', value: ',', index: 8 },
+    { type: 'word', value: 'baz', index: 10 },
+  ]
+
+  expect(parseSequence({
+    shouldThrow: true,
+    index: 0,
+    tokens,
+    source,
+    rule,
+  })).toEqual({
+    incrementIndex: 5,
+    nodes: [
+      {
+        type: 'wordList',
+        nodes: [
+          { type: 'word', value: 'foo', index: 0 },
+          { type: 'symbol', value: ',', index: 3 },
+          { type: 'word', value: 'bar', index: 5 },
+          { type: 'symbol', value: ',', index: 8 },
+          { type: 'word', value: 'baz', index: 10 },
+        ]
+      }
+    ]
+  })
+})

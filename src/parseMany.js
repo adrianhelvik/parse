@@ -1,5 +1,6 @@
 import parseSequence from './parseSequence'
 import parseEither from './parseEither'
+import parseLex from './parseLex'
 import parseOne from './parseOne'
 import JSON from 'circular-json'
 import assert from 'assert'
@@ -18,9 +19,19 @@ function parseMany({
   switch (rule.ruleType) {
     case 'lex':
       {
-        while (tokens[index+incrementIndex].type === rule.type) {
-          nodes.push(tokens[index+incrementIndex])
-          incrementIndex += 1
+        let match
+        while (
+          match = parseLex({
+            shouldThrow: shouldThrow ? 'not eof' : shouldThrow,
+            index: index+incrementIndex,
+            source,
+            rule,
+            tokens,
+            type: rule.type,
+          })
+        ) {
+          nodes.push(match.node)
+          incrementIndex += match.incrementIndex
           if (delimiter) {
             const delimiterResult = parseOne({
               index: index + incrementIndex,
@@ -43,7 +54,7 @@ function parseMany({
         let match
         while (
           match = parseSequence({
-            shouldThrow: 'not eof',
+            shouldThrow: shouldThrow ? 'not eof' : shouldThrow,
             index: index+incrementIndex,
             source,
             rule: rule.subRule,
@@ -78,7 +89,7 @@ function parseMany({
         let match
         while (
           match = parseEither({
-            shouldThrow: 'not eof',
+            shouldThrow: shouldThrow ? 'not eof' : shouldThrow,
             index: index+incrementIndex,
             source,
             rule: rule.subRule,

@@ -1,5 +1,6 @@
 import trace from '@adrianhelvik/trace'
 import parseEither from './parseEither'
+import parseMany from './parseMany'
 import JSON from 'circular-json'
 
 function parseSequence({
@@ -80,11 +81,37 @@ function parseSequence({
             rule: rule[i].subRule,
             type: rule[i].type,
           })
-          if (! parsed)
+          if (! parsed) {
+            if (shouldThrow)
+              throw Error('TODO')
             return null
+          }
           nodes.push({
             type: rule[i].type,
             node: parsed.node,
+          })
+          incrementIndex += parsed.incrementIndex
+        }
+        break
+      case 'many':
+        {
+          const parsed = parseMany({
+            shouldThrow,
+            index: index + i,
+            source,
+            tokens,
+            rule: rule[i].subRule,
+            delimiter: rule[i].delimiter,
+            type: rule[i].type,
+          })
+          if (! parsed) {
+            if (shouldThrow)
+              throw Error('TODO')
+            return null
+          }
+          nodes.push({
+            type: rule[i].type,
+            nodes: parsed.nodes,
           })
           incrementIndex += parsed.incrementIndex
         }

@@ -1,4 +1,5 @@
 import convertSyntax from './convertSyntax'
+import trace from '@adrianhelvik/trace'
 import parseOne from './parseOne'
 
 function parse({
