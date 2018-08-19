@@ -10,7 +10,8 @@
     "babel-core": "^6.26.3",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-preset-env": "^1.7.0",
-    "jest": "^23.5.0"
+    "jest": "^23.5.0",
+    "jest-extended": "^0.8.1"
   },
   "scripts": {
     "start": "jest --watch",
@@ -19,6 +20,10 @@
     "prepublishOnly": "npm run test && npm run build"
   },
   "dependencies": {
-    "@adrianhelvik/trace": "^2.0.0"
+    "@adrianhelvik/trace": "^2.0.0",
+    "circular-json": "^0.5.5"
+  },
+  "jest": {
+    "setupTestFrameworkScriptFile": "jest-extended"
   }
 }

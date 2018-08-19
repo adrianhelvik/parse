@@ -1,11 +1,14 @@
 import parseSequence from './parseSequence'
 
 function parseEither({
-    index = 0,
-    source,
-    tokens,
-    rule,
+  index = 0,
+  source,
+  tokens,
+  rule,
 }) {
+  if (index >= tokens.length)
+    return null
+
   for (let subRule of rule) {
     switch (subRule.ruleType) {
       case 'lex':

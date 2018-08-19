@@ -1,4 +1,5 @@
 import parseEither from './parseEither'
+import JSON from 'circular-json'
 
 function parseSequence({
   index = 0,
@@ -16,6 +17,8 @@ function parseSequence({
     switch (rule[i].ruleType) {
       case 'lex':
         {
+          if (! tokens[index+incrementIndex])
+            return null
           if (rule[i].type !== tokens[index+incrementIndex].type) {
             if (! rule[i].optional)
               return null
@@ -48,11 +51,13 @@ function parseSequence({
             tokens,
             rule: rule[i].subRule,
           })
+          if (! parsed)
+            return null
           nodes.push({
             type: rule[i].type,
             node: parsed.node,
           })
-          incrementIndex = parsed.incrementIndex
+          incrementIndex += parsed.incrementIndex
         }
         break
       default:

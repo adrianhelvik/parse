@@ -123,3 +123,30 @@ it('parses sequence types', () => {
 
   expect(result.incrementIndex).toBe(2)
 })
+
+it('returns null if there are no tokens left', () => {
+  const source = '12'
+  const rule = [
+    {
+      ruleType: 'lex',
+      type: 'one',
+    },
+    {
+      ruleType: 'lex',
+      type: 'two',
+    }
+  ]
+  const tokens = [
+    { type: 'one', value: '1', index: 0 },
+    { type: 'two', value: '2', index: 1 },
+  ]
+
+  const result = parseEither({
+    index: 2,
+    source,
+    tokens,
+    rule,
+  })
+
+  expect(result).toBe(null)
+})
