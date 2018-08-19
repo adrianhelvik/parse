@@ -30,6 +30,38 @@ it('converts lex types', () => {
   })
 })
 
+it('converts key:value types', () => {
+  const syntax = {
+    lex: [
+      ['word', /^[a-zA-Z]+/],
+      ['whitespace', /^[\s]+/, 'ignore'],
+    ],
+    parse: {
+      main: ['sequence', [
+        'word:hello',
+        'word:world',
+      ]]
+    }
+  }
+
+  expect(convertSyntax(syntax)).toEqual({
+    type: 'main',
+    ruleType: 'sequence',
+    subRule: [
+      {
+        type: 'word',
+        value: 'hello',
+        ruleType: 'lex',
+      },
+      {
+        type: 'word',
+        value: 'world',
+        ruleType: 'lex',
+      }
+    ]
+  })
+})
+
 it('converts the many type', () => {
   const syntax = {
     lex: [

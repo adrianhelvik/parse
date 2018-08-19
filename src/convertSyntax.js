@@ -1,3 +1,4 @@
+import splitFirst from './splitFirst'
 import JSON from 'circular-json'
 import assert from 'assert'
 
@@ -56,13 +57,20 @@ function convertSyntax(syntax) {
 
     if (rule.ruleType === 'sequence' || rule.ruleType === 'either') {
       const subRule = []
-      for (const subRuleType of subRuleSchema) {
-        const subSubRule = rulesMap.get(subRuleType)
+      for (const subRuleTypeValue of subRuleSchema) {
+        const [subRuleType, subRuleValue] = splitFirst(subRuleTypeValue, ':')
+        let subSubRule = rulesMap.get(subRuleType)
         assert(
           subSubRule,
           `Could not resolve ${subRuleType} in schema `
           + JSON.stringify(syntax.parse[type] || syntax.lex[type])
         )
+        if (subRuleValue) {
+          subSubRule = {
+            ...subSubRule,
+            value: subRuleValue,
+          }
+        }
         subRule.push(subSubRule)
       }
       rule.subRule = subRule
