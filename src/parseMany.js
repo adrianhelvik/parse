@@ -22,7 +22,7 @@ function parseMany({
         let match
         while (
           match = parseLex({
-            shouldThrow: shouldThrow ? 'not eof' : shouldThrow,
+            shouldThrow: false,
             index: index+incrementIndex,
             source,
             rule,
@@ -54,7 +54,7 @@ function parseMany({
         let match
         while (
           match = parseSequence({
-            shouldThrow: shouldThrow ? 'not eof' : shouldThrow,
+            shouldThrow: false,
             index: index+incrementIndex,
             source,
             rule: rule.subRule,
@@ -89,7 +89,7 @@ function parseMany({
         let match
         while (
           match = parseEither({
-            shouldThrow: shouldThrow ? 'not eof' : shouldThrow,
+            shouldThrow: false,
             index: index+incrementIndex,
             source,
             rule: rule.subRule,
