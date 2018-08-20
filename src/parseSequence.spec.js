@@ -284,3 +284,42 @@ it('sets shouldThrow to true if the rule has been verified', () => {
     })
   }).toThrow(/Expected symbol "}", but got symbol "_"/)
 })
+
+it('can parse many inside a sequence', () => {
+  const rule = [
+    { ruleType: 'lex', type: 'symbol', value: '{' },
+    {
+      ruleType: 'many',
+      type: 'words',
+      subRule: {
+        ruleType: 'lex',
+        type: 'word',
+      }
+    },
+    { ruleType: 'lex', type: 'symbol', value: '}' },
+  ]
+  const source = '{foo}'
+  const tokens = [
+    { type: 'symbol', value: '{', index: 0 },
+    { type: 'word', value: 'foo', index: 1 },
+    { type: 'symbol', value: '}', index: 4 },
+  ]
+  const { incrementIndex, nodes } = parseSequence({
+    shouldThrow: true,
+    index: 0,
+    source,
+    tokens,
+    rule,
+    type: 'delimited',
+  })
+  expect(nodes).toEqual([
+    { type: 'symbol', value: '{', index: 0 },
+    {
+      type: 'words',
+      nodes: [
+        { type: 'word', value: 'foo', index: 1 },
+      ]
+    },
+    { type: 'symbol', value: '}', index: 4 },
+  ])
+})
