@@ -229,7 +229,7 @@ test('case d', () => {
   )
 })
 
-test('case 1 millionth', () => {
+test('case e', () => {
   const syntax = {
     lex: [
       ['comment', /^#.*\n/],
