@@ -147,3 +147,49 @@ it('can have delimters for the many type', () => {
     }
   })
 })
+
+it('can convert VERIFIED sequence sub rules', () => {
+  const syntax = {
+    lex: [
+      ['word', /^[a-zA-Z]+/],
+      ['whitespace', /^[\s]+/],
+      ['symbol', /^[,(){}]/],
+    ],
+    parse: {
+      main: ['many', 'statement'],
+      statement: ['either', [
+        'function',
+        'word',
+      ]],
+      function: ['sequence', [
+        'word:fn',
+        'VERIFIED',
+        'symbol:{',
+        'symbol:}',
+      ]],
+    }
+  }
+
+  const converted = convertSyntax(syntax)
+
+  expect(converted).toEqual({
+    type: 'main',
+    ruleType: 'many',
+    subRule: {
+      type: 'statement',
+      ruleType: 'either',
+      subRule: [
+        {
+          type: 'function',
+          ruleType: 'sequence',
+          subRule: [
+            { type: 'word', value: 'fn', ruleType: 'lex' },
+            { type: 'symbol', value: '{', ruleType: 'lex', verified: true },
+            { type: 'symbol', value: '}', ruleType: 'lex', verified: true },
+          ]
+        },
+        { type: 'word', ruleType: 'lex' }
+      ]
+    }
+  })
+})

@@ -65,10 +65,16 @@ function convertSyntax(syntax) {
 
   for (const { type, subRuleSchema } of unresolved) {
     const rule = rulesMap.get(type)
+    let markAsVerified = false
 
     if (rule.ruleType === 'sequence' || rule.ruleType === 'either') {
       const subRule = []
       for (const subRuleTypeValue of subRuleSchema) {
+        if (subRuleTypeValue === 'VERIFIED') {
+          markAsVerified = true
+          continue
+        }
+
         const [subRuleType, subRuleValue] = splitFirst(subRuleTypeValue, ':')
         let subSubRule = rulesMap.get(subRuleType)
         assert(
@@ -80,6 +86,12 @@ function convertSyntax(syntax) {
           subSubRule = {
             ...subSubRule,
             value: subRuleValue,
+          }
+        }
+        if (markAsVerified) {
+          subSubRule = {
+            ...subSubRule,
+            verified: true
           }
         }
         subRule.push(subSubRule)
