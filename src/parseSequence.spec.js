@@ -193,7 +193,7 @@ it('throws when shouldThrow is true and no match was found', () => {
     tokens,
     rule,
     type: 'foobar',
-  })).toThrow('Expected notHere, but got one while parsing foobar.')
+  })).toThrow('Expected notHere, but got one "1" while parsing foobar.')
 })
 
 it('handles many rules', () => {
@@ -244,4 +244,43 @@ it('handles many rules', () => {
       }
     ]
   })
+})
+
+it('sets shouldThrow to true if the rule has been verified', () => {
+  const rule = [
+    {
+      ruleType: 'either',
+      type: '...',
+      subRule: [
+        {
+          ruleType: 'sequence',
+          subRule: [
+            { type: 'ident', value: 'fn', ruleType: 'lex' },
+            { type: 'symbol', value: '{', ruleType: 'lex', verified: true },
+            { type: 'symbol', value: '}', ruleType: 'lex', verified: true },
+          ]
+        },
+        { type: 'ident', ruleType: 'lex' }
+      ]
+    }
+  ]
+
+  const source = 'fn { _ }'
+  const tokens = [
+    { type: 'ident', value: 'fn', index: 0 },
+    { type: 'symbol', value: '{', index: 3 },
+    { type: 'symbol', value: '_', index: 5 },
+    { type: 'symbol', value: '}', index: 7 },
+  ]
+
+  expect(() => {
+    parseSequence({
+      shouldThrow: false,
+      index: 0,
+      tokens,
+      source,
+      rule,
+      type: '...',
+    })
+  }).toThrow(/Expected symbol "}", but got symbol "_"/)
 })

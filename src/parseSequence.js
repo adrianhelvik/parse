@@ -1,6 +1,7 @@
 import trace from '@adrianhelvik/trace'
 import parseEither from './parseEither'
 import parseMany from './parseMany'
+import parseLex from './parseLex'
 import JSON from 'circular-json'
 
 function parseSequence({
@@ -15,6 +16,9 @@ function parseSequence({
   let incrementIndex = 0
 
   for (let i = 0; i < rule.length; i++) {
+    if (rule[i].verified)
+      shouldThrow = true
+
     if (index + incrementIndex >= tokens.length) {
       if (shouldThrow && shouldThrow !== 'not eof') {
         throw Error(trace(source, source.length,
@@ -27,33 +31,23 @@ function parseSequence({
     switch (rule[i].ruleType) {
       case 'lex':
         {
-          const token = tokens[index+incrementIndex]
+          const match = parseLex({
+            shouldThrow,
+            index: index+incrementIndex,
+            source,
+            tokens,
+            rule: rule[i],
+            type,
+          })
 
-          if (
-            rule[i].type !== token.type
-            || (
-              rule[i].value &&
-              rule[i].value !== token.value
-            )
-          ) {
-            if (! rule[i].optional) {
-              if (shouldThrow) {
-                const message = 
-                  rule[i].value
-                  ? trace(source, token.index,
-                    `Expected ${rule[i].value}, but got ${token.value} while parsing ${type}.`
-                  )
-                  : trace(source, token.index,
-                    `Expected ${rule[i].type}, but got ${token.type} while parsing ${type}.`
-                  )
-                throw Error(message)
-              }
-              return null
-            }
-          } else {
-            nodes.push(token)
-            incrementIndex += 1
-          }
+          if (! match && rule[i].optional)
+            continue
+
+          if (! match)
+            return null // shouldThrow is abided by in parseLex
+
+          incrementIndex += match.incrementIndex
+          nodes.push(match.node)
         }
         break
       case 'sequence':

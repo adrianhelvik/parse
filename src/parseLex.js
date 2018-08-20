@@ -30,7 +30,7 @@ function parseLex({
     if (! isMatch) {
       if (shouldThrow)
         throw Error(trace(source, token.index,
-          `Expected ${rule.type} "${rule.value}". Got ${token.type} "${token.value}"${postfix()}`
+          `Expected ${rule.type} "${rule.value}", but got ${token.type} "${token.value}"${postfix()}.`
         ))
       return null
     }
@@ -39,7 +39,7 @@ function parseLex({
   if (rule.type !== token.type) {
     if (shouldThrow)
       throw Error(trace(source, token.index,
-        `Expected ${rule.type} got ${token.type} "${token.value}"${postfix()}`
+        `Expected ${rule.type}, but got ${token.type} "${token.value}"${postfix()}.`
       ))
     return null
   }
