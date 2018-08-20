@@ -228,3 +228,65 @@ test('case d', () => {
     }
   )
 })
+
+test('case 1 millionth', () => {
+  const syntax = {
+    lex: [
+      ['comment', /^#.*\n/],
+      ['string', /^"((\\")|[^"])+"/],
+      ['string', /^'((\\')|[^'])+'/],
+      ['whitespace', /^\s+/, 'ignore'],
+      ['keyword', /^(from|import|export|let|or|and|xor)(?![a-zA-Z0-9_$])/],
+      ['ident', /^[a-zA-Z][a-zA-Z0-9]*/],
+      ['integer', /^[1-9][0-9]*/],
+      ['double', /^([1-9][0-9]*)?\.[0-9]+/],
+      ['symbols', /^[+\-*/.={}]/],
+    ],
+    parse: {
+      main: ['many', 'statement'],
+      statement: ['either', [
+        'funcCallStatement',
+      ]],
+      funcCallStatement: ['sequence', [
+        'ident',
+        'VERIFIED',
+        'expression',
+      ]],
+      expression: ['either', [
+        'ident',
+        'string',
+      ]]
+    }
+  }
+  const source = 'print "Hello world"'
+  const tokens = lex({ source, syntax })
+
+  const ast = parse({ tokens, source, syntax })
+
+  expect(ast).toEqual({
+    "type": "main",
+    "nodes": [
+      {
+        "type": "statement",
+        "node": {
+          "type": "funcCallStatement",
+          "nodes": [
+            {
+              "index": 0,
+              "value": "print",
+              "type": "ident"
+            },
+            {
+              "type": "expression",
+              "node": {
+                "index": 6,
+                "value": "\"Hello world\"",
+                "type": "string"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  })
+})

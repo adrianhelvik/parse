@@ -3,6 +3,7 @@ import parseEither from './parseEither'
 import parseMany from './parseMany'
 import parseLex from './parseLex'
 import JSON from 'circular-json'
+import assert from 'assert'
 
 function parseSequence({
   shouldThrow,
@@ -67,6 +68,7 @@ function parseSequence({
         break
       case 'either':
         {
+          assert(Array.isArray(rule[i].subRule), `Expected eitherRule.subRule to be an array. eitherRule: ${JSON.stringify(rule[i])}`)
           const parsed = parseEither({
             shouldThrow,
             index: index + i,

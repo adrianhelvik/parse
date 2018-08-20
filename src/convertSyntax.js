@@ -83,16 +83,12 @@ function convertSyntax(syntax) {
           + JSON.stringify(syntax.parse[type] || syntax.lex[type])
         )
         if (subRuleValue) {
-          subSubRule = {
-            ...subSubRule,
-            value: subRuleValue,
-          }
+          subSubRule = Object.create(subSubRule)
+          subSubRule.value = subRuleValue
         }
         if (markAsVerified) {
-          subSubRule = {
-            ...subSubRule,
-            verified: true
-          }
+          subSubRule = Object.create(subSubRule)
+          subSubRule.verified = true
         }
         subRule.push(subSubRule)
       }

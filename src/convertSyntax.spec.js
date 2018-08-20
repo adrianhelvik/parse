@@ -44,6 +44,7 @@ it('converts key:value types', () => {
     }
   }
 
+  /* Does not work with prototypes
   expect(convertSyntax(syntax)).toEqual({
     type: 'main',
     ruleType: 'sequence',
@@ -60,6 +61,15 @@ it('converts key:value types', () => {
       }
     ]
   })
+  */
+
+  const ast = convertSyntax(syntax)
+
+  expect(ast.subRule[0].type).toBe('word')
+  expect(ast.subRule[0].value).toBe('hello')
+
+  expect(ast.subRule[1].type).toBe('word')
+  expect(ast.subRule[1].value).toBe('world')
 })
 
 it('converts the many type', () => {
@@ -170,9 +180,10 @@ it('can convert VERIFIED sequence sub rules', () => {
     }
   }
 
-  const converted = convertSyntax(syntax)
+  const ast = convertSyntax(syntax)
 
-  expect(converted).toEqual({
+  /* Sub rules are created with prototypes, so this comparison does not work.
+  expect(ast).toEqual({
     type: 'main',
     ruleType: 'many',
     subRule: {
@@ -192,4 +203,10 @@ it('can convert VERIFIED sequence sub rules', () => {
       ]
     }
   })
+  */
+
+  /* This does though */
+  expect(ast.subRule.subRule[0].subRule[0].verified).not.toBeTruthy()
+  expect(ast.subRule.subRule[0].subRule[1].verified).toBe(true)
+  expect(ast.subRule.subRule[0].subRule[2].verified).toBe(true)
 })
