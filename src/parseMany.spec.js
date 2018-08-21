@@ -311,13 +311,11 @@ test('???', () => {
     },
   ]
 
-  console.log(
-    parseMany({
-      shouldThrow: true,
-      index: 0,
-      source,
-      tokens,
-      rule,
-    })
-  )
+  const result = parseMany({
+    shouldThrow: true,
+    index: 0,
+    source,
+    tokens,
+    rule,
+  })
 })

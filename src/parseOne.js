@@ -6,7 +6,7 @@ import parseLex from './parseLex'
 import JSON from 'circular-json'
 import assert from 'assert'
 
-function parse({
+function parseOne({
   shouldThrow,
   index = 0,
   source,
@@ -17,15 +17,16 @@ function parse({
 
   switch (rule.ruleType) {
     case 'lex':
-      return parseLex({
+      result = parseLex({
         index,
         source,
         tokens,
         rule,
         shouldThrow,
       })
+      break
     case 'many':
-      return parseMany({
+      result = parseMany({
         index,
         source,
         tokens,
@@ -34,7 +35,7 @@ function parse({
       })
       break
     case 'either':
-      return parseEither({
+      result = parseEither({
         index,
         source,
         tokens,
@@ -43,7 +44,7 @@ function parse({
       })
       break
     case 'sequence':
-      return parseSequence({
+      result = parseSequence({
         index,
         source,
         tokens,
@@ -52,7 +53,7 @@ function parse({
       })
       break
     case 'one':
-      return parseOne({
+      result = parseOne({
         index,
         source,
         tokens,
@@ -64,29 +65,7 @@ function parse({
       throw Error(`Invalid rule type: ${rule.ruleType}`)
   }
 
-  const {
-    incrementIndex,
-    nodes,
-    node,
-  } = result
-
-  if (nodes) {
-    return {
-      incrementIndex,
-      node: {
-        type: rule.type,
-        nodes,
-      }
-    }
-  }
-
-  return {
-    incrementIndex,
-    node: {
-      type: rule.type,
-      node,
-    }
-  }
+  return result
 }
 
-export default parse
+export default parseOne

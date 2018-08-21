@@ -23,6 +23,9 @@ function parseSequence({
       shouldThrow = true
 
     if (index + incrementIndex >= tokens.length) {
+      if (rule[i].ruleType === 'optional')
+        continue
+
       if (shouldThrow && shouldThrow !== 'not eof') {
         if (rule[i].value) {
           throw Error(trace(source, source.length,
@@ -59,6 +62,26 @@ function parseSequence({
           nodes.push(match.node)
         }
         break
+      case 'optional':
+        {
+          const match = parseOne({
+            shouldThrow: false,
+            index: index+incrementIndex,
+            source,
+            tokens,
+            rule: rule[i].subRule,
+            type,
+          })
+
+          if (! match) {
+            console.log('Did not match optional rule:', rule[i].subRule)
+            continue
+          }
+
+          incrementIndex += match.incrementIndex
+          nodes.push(match.node)
+        }
+        break
       case 'lex':
         {
           const match = parseLex({
@@ -70,11 +93,13 @@ function parseSequence({
             type,
           })
 
-          if (! match && rule[i].optional)
+          if (! match && rule[i].optional) {
             continue
+          }
 
-          if (! match)
+          if (! match) {
             return null // shouldThrow is abided by in parseLex
+          }
 
           incrementIndex += match.incrementIndex
           nodes.push(match.node)
@@ -92,7 +117,7 @@ function parseSequence({
           if (! parsed) {
             if (shouldThrow) {
               expectationError({
-                token: tokens[index],
+                token: tokens[index+incrementIndex],
                 rule: rule[i],
                 source,
               })

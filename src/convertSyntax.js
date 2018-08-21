@@ -37,11 +37,9 @@ function convertSyntax(syntax) {
   }
 
   function populateRule(rule) {
-    if (rule._populated)
+    if (! rule.ruleSchema)
       return
-    Object.defineProperty(rule, '_populated', {
-      value: true
-    })
+
     switch (rule.ruleType) {
       case 'either':
       case 'sequence':
@@ -59,11 +57,21 @@ function convertSyntax(syntax) {
       case 'one_plus':
         populateOnePlus(rule)
         break
+      case 'optional':
+        populateOptionalRule(rule)
+        break
       default:
-        throw Error(`Unknown rule type: "${rule.ruleType}"`)
+        throw Error(`Unknown rule type: "${rule.ruleType}" in rule ${JSON.stringify(rule)}`)
     }
 
     delete rule.ruleSchema
+  }
+
+  function populateOptionalRule(rule) {
+    const { ruleSchema } = rule
+    const subType = ruleSchema[1]
+
+    rule.subRule = lookupRule(subType)
   }
 
   function populateManyRule(rule) {
@@ -101,7 +109,10 @@ function convertSyntax(syntax) {
 
   function populateMultiRule(rule) {
     const subType = rule.ruleSchema[1]
+    console.log(`subRule in populateMultiRule: ${JSON.stringify(subType)}`)
     rule.subRule = []
+
+    assert(Array.isArray(subType), `Expected subType to be an array. Got ${JSON.stringify(subType)} in rule: ${JSON.stringify(rule)}`)
 
     let verified = false
     for (const part of subType) {
@@ -117,7 +128,14 @@ function convertSyntax(syntax) {
           rule.subRule.push(subRule)
         }
       } else {
-        populateRule(rule)
+        console.info(part)
+        const subRule = {
+          ruleType: part[0],
+          ruleSchema: part,
+          type: 'anonymous',
+        }
+        rule.subRule.push(subRule)
+        populateRule(subRule)
       }
     }
   }
@@ -130,7 +148,7 @@ function convertSyntax(syntax) {
       const rule = {
         ruleType: x[0],
         type: 'anonymous',
-        ruleSchema: x[1],
+        ruleSchema: x,
       }
       populateRule(rule)
       return rule
