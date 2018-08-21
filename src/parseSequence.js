@@ -22,9 +22,15 @@ function parseSequence({
 
     if (index + incrementIndex >= tokens.length) {
       if (shouldThrow && shouldThrow !== 'not eof') {
-        throw Error(trace(source, source.length,
-          `Expected ${rule[i].type}, but reached the end of the source.`
-        ))
+        if (rule[i].value) {
+          throw Error(trace(source, source.length,
+            `Expected ${rule[i].type} "${rule[i].value}", but reached the end of the source.`
+          ))
+        } else {
+          throw Error(trace(source, source.length,
+            `Expected ${rule[i].type}, but reached the end of the source.`
+          ))
+        }
       }
       return null
     }

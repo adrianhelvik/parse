@@ -1,3 +1,4 @@
+import convertSyntax from './convertSyntax'
 import parseMany from './parseMany'
 import JSON from 'circular-json'
 
@@ -268,4 +269,54 @@ it('can parse delimited types without trailing delimiter', () => {
       node: { type: 'ident', value: 'export', index: 7 },
     },
   ])
+})
+
+test('???', () => {
+  const syntax = {
+    lex: [
+      ['keyword', /^(fn)/],
+      ['symbol', /^[{}]/],
+    ],
+    parse: {
+      main: ['sequence', [
+        'keyword:fn',
+        'VERIFIED',
+        'funcArgs',
+        'symbol:{',
+        'statementList',
+        'symbol:}',
+      ]],
+      funcArgs: ['many', 'ident', 'symbol:,'],
+      statementList: ['many', 'ident'],
+    }
+  }
+  const rule = convertSyntax(syntax)
+  const source = 'fn {}'
+  const tokens = [
+    {
+      type: 'keyword',
+      value: 'fn',
+      index: 0,
+    },
+    {
+      type: 'symbol',
+      value: '{',
+      index: 3,
+    },
+    {
+      type: 'symbol',
+      value: '}',
+      index: 4,
+    },
+  ]
+
+  return console.log(rule)
+
+  parseMany({
+    shouldThrow: true,
+    index: 0,
+    source,
+    tokens,
+    rule,
+  })
 })

@@ -11,7 +11,6 @@ function parseLex({
   if (isNaN(index)) throw Error('Got NaN as index')
   if (index >= tokens.length) {
     if (shouldThrow) {
-      console.log(tokens, index)
       throw Error(trace(source, source.length,
         `Expected ${rule.type}${rule.value ? ` "${rule.value}"` : ``}. Reached end of source.`
       ))

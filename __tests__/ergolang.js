@@ -381,15 +381,12 @@ test('case g', () => {
       ['whitespace', /^\s+/, 'ignore'],
       ['keyword', /^(let|test|fn)(?![a-zA-Z])/],
       ['ident', /^[a-zA-Z][a-zA-Z0-9]*/],
-      ['double', /^([1-9][0-9]*)?\.[0-9]+/],
-      ['integer', /^[1-9][0-9]*/],
       ['symbol', /^[=\[\],(){}.]/],
     ],
     parse: {
       main: ['many', 'rootStatement'],
       rootStatement: ['either', [
         'statement',
-        'test',
       ]],
       statementList: ['many', 'statement'],
       statement: ['either', [
@@ -404,14 +401,8 @@ test('case g', () => {
         'funcCall',
         'ident',
         'string',
-        'number',
-        'list',
-        'touple',
-        'funcExpression',
-      ]],
-      number: ['either', [
-        'integer',
-        'double',
+        'nonary function literal',
+        'unary function literal',
       ]],
       varDecl: ['sequence', [
         'keyword:let',
@@ -420,27 +411,14 @@ test('case g', () => {
         'symbol:=',
         'expression',
       ]],
-      list: ['sequence', [
-        'symbol:[',
-        'listItems',
-        'symbol:]',
-      ]],
-      listItems: ['many', 'expression', 'symbol:,'],
-      touple: ['sequence', [
-        'symbol:(',
+      'nonary function literal': ['sequence', [
+        'keyword:fn',
         'VERIFIED',
-        'listItems',
-        'symbol:)',
-      ]],
-      test: ['sequence', [
-        'keyword:test',
-        'VERIFIED',
-        'string',
         'symbol:{',
         'statementList',
         'symbol:}',
       ]],
-      funcExpression: ['sequence', [
+      'unary function literal': ['sequence', [
         'keyword:fn',
         'VERIFIED',
         'funcArgs',
@@ -448,7 +426,9 @@ test('case g', () => {
         'statementList',
         'symbol:}',
       ]],
-      funcArgs: ['many', 'ident', 'symbol:,'],
+      funcArgs: ['either', [
+        'ident',
+      ]],
     }
   }
 
