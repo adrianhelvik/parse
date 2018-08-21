@@ -38,7 +38,7 @@ test('case a', () => {
 
   expect(() => {
     convertSyntax(syntax)
-  }).toThrow('Could not resolve varDecl in schema ["either",["funcCall","varDecl"]]')
+  }).toThrow(/varDecl/)
 })
 
 xtest('case b', () => {

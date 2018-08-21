@@ -125,11 +125,11 @@ describe('from ergolang', () => {
 
     expect(() => {
       convertSyntax(syntax)
-    }).toThrow(/many/)
+    }).toThrow(/Unknown rule type: "statement"/)
   })
 })
 
-it('can have delimters for the many type', () => {
+it('can have delimiters for the many type', () => {
   const syntax = {
     lex: [
       ['word', /^[a-zA-Z]+/],
@@ -143,6 +143,7 @@ it('can have delimters for the many type', () => {
 
   const converted = convertSyntax(syntax)
 
+  /*
   expect(converted).toEqual({
     type: 'main',
     ruleType: 'many',
@@ -156,6 +157,15 @@ it('can have delimters for the many type', () => {
       value: ',',
     }
   })
+  */
+
+  expect(converted.type).toBe('main')
+  expect(converted.ruleType).toBe('many')
+  expect(converted.subRule.type).toBe('word')
+  expect(converted.subRule.ruleType).toBe('lex')
+  expect(converted.delimiter.ruleType).toBe('lex')
+  expect(converted.delimiter.type).toBe('symbol')
+  expect(converted.delimiter.value).toBe(',')
 })
 
 it('can convert VERIFIED sequence sub rules', () => {

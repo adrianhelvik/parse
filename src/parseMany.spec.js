@@ -276,6 +276,7 @@ test('???', () => {
     lex: [
       ['keyword', /^(fn)/],
       ['symbol', /^[{}]/],
+      ['ident', /^[a-zA-Z][a-zA-Z0-9]*/],
     ],
     parse: {
       main: ['sequence', [
@@ -310,13 +311,13 @@ test('???', () => {
     },
   ]
 
-  return console.log(rule)
-
-  parseMany({
-    shouldThrow: true,
-    index: 0,
-    source,
-    tokens,
-    rule,
-  })
+  console.log(
+    parseMany({
+      shouldThrow: true,
+      index: 0,
+      source,
+      tokens,
+      rule,
+    })
+  )
 })

@@ -1,7 +1,9 @@
+import expectationError from './expectationError'
 import trace from '@adrianhelvik/trace'
 import parseEither from './parseEither'
 import parseMany from './parseMany'
 import parseLex from './parseLex'
+import parseOne from './parseOne'
 import JSON from 'circular-json'
 import assert from 'assert'
 
@@ -36,6 +38,27 @@ function parseSequence({
     }
 
     switch (rule[i].ruleType) {
+      case 'one':
+        {
+          const match = parseOne({
+            shouldThrow,
+            index: index+incrementIndex,
+            source,
+            tokens,
+            rule: rule[i].subRule,
+            type,
+          })
+
+          if (! match && rule[i].optional)
+            continue
+
+          if (! match)
+            return null // shouldThrow is abided by in parseLex
+
+          incrementIndex += match.incrementIndex
+          nodes.push(match.node)
+        }
+        break
       case 'lex':
         {
           const match = parseLex({
@@ -65,6 +88,18 @@ function parseSequence({
             tokens,
             rule: rule[i].subRule,
           })
+
+          if (! parsed) {
+            if (shouldThrow) {
+              expectationError({
+                token: tokens[index],
+                rule: rule[i],
+                source,
+              })
+            }
+            return null
+          }
+
           nodes.push({
             type: rule[i].type,
             nodes: parsed.nodes,

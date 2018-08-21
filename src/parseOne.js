@@ -43,7 +43,16 @@ function parse({
       })
       break
     case 'sequence':
-      return  parseSequence({
+      return parseSequence({
+        index,
+        source,
+        tokens,
+        rule: rule.subRule,
+        shouldThrow,
+      })
+      break
+    case 'one':
+      return parseOne({
         index,
         source,
         tokens,

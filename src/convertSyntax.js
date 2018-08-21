@@ -4,10 +4,21 @@ import assert from 'assert'
 
 function convertSyntax(syntax) {
   const rulesMap = new Map()
-  const unresolvedDelimiters = []
-  const unresolved = []
+  const shallowRules = []
 
   for (const ruleSchema of syntax.lex) {
+    addLexRule(ruleSchema)
+  }
+
+  for (const type of Object.keys(syntax.parse))
+    addShallowParseRule(type, syntax.parse[type])
+
+  for (const rule of shallowRules)
+    populateRule(rule)
+
+  return rulesMap.get('main')
+
+  function addLexRule(ruleSchema) {
     const type = ruleSchema[0]
     rulesMap.set(type, {
       type,
@@ -15,105 +26,132 @@ function convertSyntax(syntax) {
     })
   }
 
-  for (const type of Object.keys(syntax.parse)) {
-    const ruleSchema = syntax.parse[type]
+  function addShallowParseRule(type, ruleSchema) {
     const rule = {
+      ruleType: ruleSchema[0],
       type,
-      ruleType: null,
+      ruleSchema,
     }
-    let subRuleSchema
-
-    if (ruleSchema[0] === 'many') {
-      subRuleSchema = ruleSchema[1]
-      rule.ruleType = 'many'
-      if (ruleSchema.length >= 3) {
-        unresolvedDelimiters.push({
-          delimiter: ruleSchema[2],
-          rule,
-        })
-      }
-    } else {
-      for (const part of ruleSchema) {
-        if (part === 'sequence')
-          rule.ruleType = 'sequence'
-        else if (part === 'either')
-          rule.ruleType = 'either'
-        else if (Array.isArray(part)) {
-          if (subRuleSchema)
-            throw Error('Attempted to overwrite existing subRuleSchema ' + JSON.stringify(subRuleSchema) + ' with ' + JSON.stringify(part))
-          subRuleSchema = part
-        }
-        else if (typeof part === 'string') {
-          if (subRuleSchema)
-            throw Error('Attempted to overwrite existing subRuleSchema ' + JSON.stringify(subRuleSchema) + ' with ' + JSON.stringify(part))
-          else
-            subRuleSchema = part
-        }
-      }
-    }
-
-    if (rule.ruleType === 'many' && typeof subRuleSchema !== 'string') {
-      throw Error('Invalid many-rule. The correct format is [string, string, string?]. Got: ' + JSON.stringify(syntax.parse[type]))
-    }
-
     rulesMap.set(type, rule)
-    unresolved.push({
-      type,
-      subRuleSchema,
-    })
+    shallowRules.push(rule)
   }
 
-  for (const { type, subRuleSchema } of unresolved) {
-    const rule = rulesMap.get(type)
-    let markAsVerified = false
+  function populateRule(rule) {
+    if (rule._populated)
+      return
+    Object.defineProperty(rule, '_populated', {
+      value: true
+    })
+    switch (rule.ruleType) {
+      case 'either':
+      case 'sequence':
+        populateMultiRule(rule)
+        break
+      case 'one':
+        populateOneRule(rule)
+        break
+      case 'many':
+        populateManyRule(rule)
+        break
+      case 'zero_plus':
+        populateZeroPlus(rule)
+        break
+      case 'one_plus':
+        populateOnePlus(rule)
+        break
+      default:
+        throw Error(`Unknown rule type: "${rule.ruleType}"`)
+    }
 
-    if (rule.ruleType === 'sequence' || rule.ruleType === 'either') {
-      const subRule = []
-      for (const subRuleTypeValue of subRuleSchema) {
-        if (subRuleTypeValue === 'VERIFIED') {
-          markAsVerified = true
-          continue
-        }
+    delete rule.ruleSchema
+  }
 
-        const [subRuleType, subRuleValue] = splitFirst(subRuleTypeValue, ':')
-        let subSubRule = rulesMap.get(subRuleType)
-        assert(
-          subSubRule,
-          `Could not resolve ${subRuleType} in schema `
-          + JSON.stringify(syntax.parse[type] || syntax.lex[type])
-        )
-        if (subRuleValue) {
-          subSubRule = Object.create(subSubRule)
-          subSubRule.value = subRuleValue
-        }
-        if (markAsVerified) {
-          subSubRule = Object.create(subSubRule)
-          subSubRule.verified = true
-        }
-        subRule.push(subSubRule)
-      }
-      rule.subRule = subRule
-    } else {
-      const subRule = rulesMap.get(subRuleSchema)
-      rule.subRule = subRule
+  function populateManyRule(rule) {
+    const { ruleSchema } = rule
+    const subType = ruleSchema[1]
+    const delimiter = ruleSchema[2]
+
+    rule.subRule = lookupRule(subType)
+
+    if (delimiter) {
+      rule.delimiter = lookupRule(delimiter)
     }
   }
 
-  for (const { delimiter, rule } of unresolvedDelimiters) {
-    const [type, value] = splitFirst(delimiter, ':')
+  function populateOneRule(rule) {
+    const { ruleSchema } = rule
+    const subType = ruleSchema[1]
 
-    const delimiterRule = rulesMap.get(type)
-
-    if (value)
-      rule.delimiter = {
-        ...delimiterRule,
-        value,
-      }
-    else
-      rule.delimiter = delimiterRule
+    rule.subRule = lookupRule(subType)
   }
 
-  return rulesMap.get('main')
+  function populateZeroPlus(rule) {
+    const { ruleSchema } = rule
+    const subType = ruleSchema[1]
+
+    rule.subRule = lookupRule(subType)
+  }
+
+  function populateOnePlus(rule) {
+    const { ruleSchema } = rule
+    const subType = ruleSchema[1]
+
+    rule.subRule = lookupRule(subType)
+  }
+
+  function populateMultiRule(rule) {
+    const subType = rule.ruleSchema[1]
+    rule.subRule = []
+
+    let verified = false
+    for (const part of subType) {
+      if (typeof part === 'string') {
+        if (part === 'VERIFIED')
+          verified = true
+        else {
+          let subRule = lookupRule(part)
+          if (verified) {
+            subRule = Object.create(subRule)
+            subRule.verified = true
+          }
+          rule.subRule.push(subRule)
+        }
+      } else {
+        populateRule(rule)
+      }
+    }
+  }
+
+  function lookupRule(x) {
+    if (! x)
+      throw Error('Cannot lookup ' + x)
+
+    if (Array.isArray(x)) {
+      const rule = {
+        ruleType: x[0],
+        type: 'anonymous',
+        ruleSchema: x[1],
+      }
+      populateRule(rule)
+      return rule
+    }
+
+    const [key, value] = splitFirst(x, ':')
+    let subRule
+
+    if (value) {
+      subRule = Object.create(rulesMap.get(key))
+      if (subRule)
+        subRule.value = value
+    } else {
+      subRule = rulesMap.get(x)
+    }
+
+    if (! subRule)
+      throw Error(`lookupRule: Failed to lookup rule: ${JSON.stringify(key)}`)
+
+    return subRule
+  }
 }
 
 export default convertSyntax

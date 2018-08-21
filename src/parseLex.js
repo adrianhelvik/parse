@@ -28,7 +28,6 @@ function parseLex({
 
     if (! isMatch) {
       if (shouldThrow) {
-        console.log(tokens, index)
         throw Error(trace(source, token.index,
           `Expected ${rule.type} "${rule.value}", but got ${token.type} "${token.value}"${postfix()}.`
         ))
