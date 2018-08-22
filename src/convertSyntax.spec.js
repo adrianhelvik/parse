@@ -63,13 +63,13 @@ it('converts key:value types', () => {
   })
   */
 
-  const ast = convertSyntax(syntax)
+  const rule = convertSyntax(syntax)
 
-  expect(ast.subRule[0].type).toBe('word')
-  expect(ast.subRule[0].value).toBe('hello')
+  expect(rule.subRule[0].type).toBe('word')
+  expect(rule.subRule[0].value).toBe('hello')
 
-  expect(ast.subRule[1].type).toBe('word')
-  expect(ast.subRule[1].value).toBe('world')
+  expect(rule.subRule[1].type).toBe('word')
+  expect(rule.subRule[1].value).toBe('world')
 })
 
 it('converts the many type', () => {
@@ -103,7 +103,7 @@ describe('from ergolang', () => {
         ['ident', /^[a-zA-Z][a-zA-Z0-9]*/],
         ['double', /^([1-9][0-9]*)?\.[0-9]+/],
         ['integer', /^[1-9][0-9]*/],
-        ['symbol', /^[=\[\],()]/],
+        ['symbol', /^[=[\],()]/],
       ],
       parse: {
         main: ['many', [
@@ -125,7 +125,7 @@ describe('from ergolang', () => {
 
     expect(() => {
       convertSyntax(syntax)
-    }).toThrow(/Unknown rule type: "statement"/)
+    }).toThrow(/statement.+rule type/)
   })
 })
 
@@ -190,10 +190,10 @@ it('can convert VERIFIED sequence sub rules', () => {
     }
   }
 
-  const ast = convertSyntax(syntax)
+  const rule = convertSyntax(syntax)
 
   /* Sub rules are created with prototypes, so this comparison does not work.
-  expect(ast).toEqual({
+  expect(rule).toEqual({
     type: 'main',
     ruleType: 'many',
     subRule: {
@@ -216,7 +216,47 @@ it('can convert VERIFIED sequence sub rules', () => {
   */
 
   /* This does though */
-  expect(ast.subRule.subRule[0].subRule[0].verified).not.toBeTruthy()
-  expect(ast.subRule.subRule[0].subRule[1].verified).toBe(true)
-  expect(ast.subRule.subRule[0].subRule[2].verified).toBe(true)
+  expect(rule.subRule.subRule[0].subRule[0].verified).not.toBeTruthy()
+  expect(rule.subRule.subRule[0].subRule[1].verified).toBe(true)
+  expect(rule.subRule.subRule[0].subRule[2].verified).toBe(true)
+})
+
+describe('optional', () => {
+  const syntax = {
+    lex: [
+      ['symbol', /^[!]/],
+    ],
+    parse: {
+      main: ['optional', 'symbol:!',],
+    }
+  }
+
+  it('does not throw', () => {
+    expect(() => {
+      convertSyntax(syntax)
+    }).not.toThrow()
+  })
+})
+
+describe('error from pascal', () => {
+  const syntax = {
+    lex: [
+      ['symbol', /^(<=|>=|[.+;=:[\]*()<>])/],
+      ['name', /^[a-zA-Z]+/],
+    ],
+    parse: {
+      main: ['sequence', [
+        ['optional', [
+          'symbol:[',
+          'symbol:]',
+        ]],
+      ]],
+    }
+  }
+
+  it('throws a descriptive error', () => {
+    expect(() => {
+      convertSyntax(syntax)
+    }).toThrow(/array.+should have used a string/i)
+  })
 })

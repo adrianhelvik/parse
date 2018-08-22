@@ -1,4 +1,5 @@
 import parseSequence from './parseSequence'
+import parseOnePlus from './parseOnePlus'
 import parseEither from './parseEither'
 import trace from '@adrianhelvik/trace'
 import parseMany from './parseMany'
@@ -54,6 +55,15 @@ function parseOne({
       break
     case 'one':
       result = parseOne({
+        index,
+        source,
+        tokens,
+        rule: rule.subRule,
+        shouldThrow,
+      })
+      break
+    case 'one_plus':
+      result = parseOnePlus({
         index,
         source,
         tokens,

@@ -7,7 +7,7 @@ export default {
     ['comment', /^\/\*(.|[\s])+?\*\//m, 'ignore'],
     ['comment', /^{.+}/m, 'ignore'],
     ['whitespace', /^[\s]+/m, 'ignore'],
-    ['symbol', /^(<=|>=|[.+;=:\[\]*()<>])/],
+    ['symbol', /^(<=|>=|[.+;=:[\]*()<>])/],
   ],
   parse: {
 
@@ -27,10 +27,10 @@ export default {
     block: ['sequence', [
       ['optional', 'const_decl_part'],
       ['optional', 'var_decl_part'],
-      ['one_plus', ['either', [
+      ['optional', ['one_plus', ['either', [ // Changed from one_plus to zero_plus
         'func_decl',
         'proc_decl',
-      ]]],
+      ]]]],
       'word:begin',
       'stmt_list',
       'word:end',
@@ -139,11 +139,11 @@ export default {
     ]],
     variable: ['sequence', [
       'name',
-      ['optional', [
+      ['optional', ['sequence', [
         'symbol:[',
         'expression',
         'symbol:]',
-      ]],
+      ]]],
     ]],
     proc_call: ['sequence', [
       'name',

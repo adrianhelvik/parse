@@ -1,5 +1,6 @@
 import parseSequence from './parseSequence'
 import trace from '@adrianhelvik/trace'
+import parseOne from './parseOne'
 import parseLex from './parseLex'
 
 function parseEither({
@@ -66,6 +67,28 @@ function parseEither({
       case 'sequence':
         {
           const match = parseSequence({
+            shouldThrow: false,
+            index,
+            source,
+            tokens,
+            rule: subRule.subRule,
+            type: subRule.type,
+          })
+
+          if (match) {
+            return {
+              incrementIndex: match.incrementIndex,
+              node: {
+                type: subRule.type,
+                nodes: match.nodes
+              }
+            }
+          }
+        }
+        break
+      case 'one':
+        {
+          const match = parseOne({
             shouldThrow: false,
             index,
             source,

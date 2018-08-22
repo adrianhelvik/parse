@@ -2,6 +2,16 @@ import splitFirst from './splitFirst'
 import JSON from 'circular-json'
 import assert from 'assert'
 
+const validRuleTypes = [
+  'sequence',
+  'optional',
+  'many',
+  'one_plus',
+  'zero_plus',
+  'one',
+  'either',
+]
+
 function convertSyntax(syntax) {
   const rulesMap = new Map()
   const shallowRules = []
@@ -109,7 +119,6 @@ function convertSyntax(syntax) {
 
   function populateMultiRule(rule) {
     const subType = rule.ruleSchema[1]
-    console.log(`subRule in populateMultiRule: ${JSON.stringify(subType)}`)
     rule.subRule = []
 
     assert(Array.isArray(subType), `Expected subType to be an array. Got ${JSON.stringify(subType)} in rule: ${JSON.stringify(rule)}`)
@@ -128,7 +137,6 @@ function convertSyntax(syntax) {
           rule.subRule.push(subRule)
         }
       } else {
-        console.info(part)
         const subRule = {
           ruleType: part[0],
           ruleSchema: part,
@@ -145,6 +153,8 @@ function convertSyntax(syntax) {
       throw Error('Cannot lookup ' + x)
 
     if (Array.isArray(x)) {
+      if (! validRuleTypes.includes(x[0]))
+        throw Error(x[0] + ' is not a valid rule type. Maybe you used an array where you should have used a string?')
       const rule = {
         ruleType: x[0],
         type: 'anonymous',

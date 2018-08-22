@@ -51,9 +51,12 @@ describe('part of syntax a', () => {
   })
 })
 
-xit('can parse the syntax', () => {
-  const source = fs.readFileSync(__dirname + '/../../pascal/primes.pas', 'utf-8')
+describe('parsing', () => {
   const tokens = lex({ source, syntax })
 
-  parse({ tokens, source, syntax })
+  it('does not throw', () => {
+    expect(() => {
+      parse({ tokens, source, syntax })
+    }).not.toThrow()
+  })
 })

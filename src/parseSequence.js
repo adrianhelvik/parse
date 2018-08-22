@@ -1,4 +1,5 @@
 import expectationError from './expectationError'
+import parseOnePlus from './parseOnePlus'
 import trace from '@adrianhelvik/trace'
 import parseEither from './parseEither'
 import parseMany from './parseMany'
@@ -56,7 +57,7 @@ function parseSequence({
             continue
 
           if (! match)
-            return null // shouldThrow is abided by in parseLex
+            return null // shouldThrow is abided by in parseOne
 
           incrementIndex += match.incrementIndex
           nodes.push(match.node)
@@ -73,10 +74,8 @@ function parseSequence({
             type,
           })
 
-          if (! match) {
-            console.log('Did not match optional rule:', rule[i].subRule)
-            continue
-          }
+          if (! match)
+          continue
 
           incrementIndex += match.incrementIndex
           nodes.push(match.node)
@@ -108,7 +107,7 @@ function parseSequence({
       case 'sequence':
         {
           const parsed = parseSequence({
-            index: index + i,
+            index: index + incrementIndex,
             source,
             tokens,
             rule: rule[i].subRule,
@@ -118,8 +117,11 @@ function parseSequence({
             if (shouldThrow) {
               expectationError({
                 token: tokens[index+incrementIndex],
+                sequenceMatch: nodes,
+                sequenceRule: rule,
                 rule: rule[i],
                 source,
+                type,
               })
             }
             return null
@@ -137,7 +139,7 @@ function parseSequence({
           assert(Array.isArray(rule[i].subRule), `Expected eitherRule.subRule to be an array. eitherRule: ${JSON.stringify(rule[i])}`)
           const parsed = parseEither({
             shouldThrow,
-            index: index + i,
+            index: index + incrementIndex,
             source,
             tokens,
             rule: rule[i].subRule,
@@ -155,11 +157,33 @@ function parseSequence({
           incrementIndex += parsed.incrementIndex
         }
         break
+      case 'zero_plus':
       case 'many':
         {
+          // TODO: Deprecate this in favor of one_plus and zero_plus
           const parsed = parseMany({
             shouldThrow,
-            index: index + i,
+            index: index + incrementIndex,
+            source,
+            tokens,
+            rule: rule[i].subRule,
+            delimiter: rule[i].delimiter,
+            type: rule[i].type,
+          })
+          if (! parsed)
+          continue
+          nodes.push({
+            type: rule[i].type,
+            nodes: parsed.nodes,
+          })
+          incrementIndex += parsed.incrementIndex
+        }
+        break
+      case 'one_plus':
+        {
+          const parsed = parseOnePlus({
+            shouldThrow,
+            index: index + incrementIndex,
             source,
             tokens,
             rule: rule[i].subRule,
