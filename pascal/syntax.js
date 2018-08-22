@@ -45,6 +45,7 @@ export default {
     ]],
     const_decl: ['sequence', [
       'name',
+      'VERIFIED',
       'symbol:=',
       'constant',
       'symbol:;',
@@ -68,6 +69,7 @@ export default {
       ['one_plus', 'var_decl'],
     ]],
     var_decl: ['sequence', [
+      'VERIFIED',
       'name',
       'symbol::',
       'type',

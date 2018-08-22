@@ -5,6 +5,8 @@ function ruleToString(rule) {
     switch (rule.ruleType) {
       case 'optional':
         return `optional ${ruleToString(rule.subRule)}`
+      case 'one_plus':
+        return `one or more ${ruleToString(rule.subRule)}`
       default:
         return `anonymous ${rule.ruleType}`
     }

@@ -14,10 +14,8 @@ function parseSequence(ctx) {
     }
     subCtx.rule = subRule
     subCtx.index = ctx.index + inc
-    if (verified && subCtx.optional) {
+    if (verified)
       subCtx.optional = 0
-      console.log('MAMAMAMAMA', SequenceTerminatedError(subCtx))
-    }
     const match = parseRule(subCtx)
     if (! match) {
       if (subCtx.optional)

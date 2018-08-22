@@ -241,7 +241,7 @@ describe('one_plus', () => {
 
     expect(() => {
       parse({ tokens, source, syntax })
-    }).toThrow(/Expected anonymous one_plus/)
+    }).toThrow(/Expected one or more one/)
   })
 
   test('when it is optional and there is no match', () => {
