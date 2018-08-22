@@ -1,4 +1,4 @@
-import convertSyntax from './convertSyntax'
+import convertSyntax from '@adrianhelvik/convert-syntax'
 import parseMany from './parseMany'
 import JSON from 'circular-json'
 

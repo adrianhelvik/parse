@@ -21,6 +21,7 @@
     "prepublishOnly": "npm run test && npm run build"
   },
   "dependencies": {
+    "@adrianhelvik/convert-syntax": "^1.0.0",
     "@adrianhelvik/trace": "^4.0.0",
     "circular-json": "^0.5.5"
   },

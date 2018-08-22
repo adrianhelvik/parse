@@ -1,4 +1,4 @@
-import convertSyntax from '../src/convertSyntax'
+import convertSyntax from '@adrianhelvik/convert-syntax'
 import lex from '@adrianhelvik/lex'
 import parse from '../src/parse'
 import JSON from 'circular-json'

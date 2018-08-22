@@ -1,4 +1,4 @@
-import convertSyntax from './convertSyntax'
+import convertSyntax from '@adrianhelvik/convert-syntax'
 import trace from '@adrianhelvik/trace'
 import parseOne from './parseOne'
 
@@ -10,20 +10,22 @@ function parse({
 }) {
   const rule = convertSyntax(syntax)
 
-  const {
-    incrementIndex,
-    nodes,
-    node,
-  } = parseOne({
+  const parsed = parseOne({
     index,
     source,
     tokens,
     rule,
-    shouldThrow: true
+    shouldThrow: true,
   })
 
+  if (! parsed) {
+    throw Error(trace(source, 0, 'Parsing did not complete'))
+  }
+
+  const { incrementIndex, nodes, node } = parsed
+
   if (index+incrementIndex < tokens.length) {
-    console.log(JSON.stringify(nodes || node, null, 2))
+    console.log(incrementIndex)
     throw Error(trace(source, tokens[index+incrementIndex].index, 'Parsing did not complete'))
   }
 

@@ -1,3 +1,4 @@
+import expectationError from './expectationError'
 import parseSequence from './parseSequence'
 import parseOnePlus from './parseOnePlus'
 import parseEither from './parseEither'
@@ -16,6 +17,9 @@ function parseOne({
 }) {
   let result
 
+  if (shouldThrow == null)
+    throw Error('shouldThrow must be a boolean. Got ' + shouldThrow)
+
   switch (rule.ruleType) {
     case 'lex':
       result = parseLex({
@@ -26,6 +30,7 @@ function parseOne({
         shouldThrow,
       })
       break
+    case 'zero_plus':
     case 'many':
       result = parseMany({
         index,
@@ -73,6 +78,16 @@ function parseOne({
       break
     default:
       throw Error(`Invalid rule type: ${rule.ruleType}`)
+  }
+
+  if (! result || (Array.isArray(result) && ! result.length)) {
+    if (shouldThrow)
+      expectationError({
+        source,
+        token: tokens[index],
+        rule,
+      })
+    return null
   }
 
   return result

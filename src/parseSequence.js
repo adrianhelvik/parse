@@ -107,6 +107,7 @@ function parseSequence({
       case 'sequence':
         {
           const parsed = parseSequence({
+            shouldThrow,
             index: index + incrementIndex,
             source,
             tokens,
