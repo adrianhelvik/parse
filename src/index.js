@@ -5,6 +5,7 @@ function parse({ syntax, tokens, source }) {
   const rule = convertSyntax(syntax)
 
   const ctx = {
+    optional: 0,
     index: 0,
     tokens,
     source,

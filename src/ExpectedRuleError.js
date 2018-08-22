@@ -1,7 +1,8 @@
+import ruleToString from './ruleToString'
 import trace from '@adrianhelvik/trace'
 
 function ExpectedRuleError(ctx) {
-  const message = `Expected ${ctx.rule.type} ${ctx.rule.ruleType}`
+  const message = `Expected ${ruleToString(ctx.rule)}`
   return Error(trace(ctx.source, ctx.tokens[ctx.index].index, message))
 }
 

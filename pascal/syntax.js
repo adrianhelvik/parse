@@ -1,11 +1,11 @@
 export default {
   lex: [
+    ['comment', /^\/\*(.|[\s\n])+?\*\//m, 'ignore'],
+    ['comment', /^{.+}/m, 'ignore'],
     ['word', /^[a-zA-Z][a-zA-Z0-9]*/],
     ['numeric_literal', /^[0-9]+/],
     ['char_literal', /^'(('')|[^'])+'/],
     ['char_literal', /^’((’’)|[^’])+’/],
-    ['comment', /^\/\*(.|[\s])+?\*\//m, 'ignore'],
-    ['comment', /^{.+}/m, 'ignore'],
     ['whitespace', /^[\s]+/m, 'ignore'],
     ['symbol', /^(<=|>=|[.+;=:[\]*()<>])/],
   ],
@@ -40,6 +40,7 @@ export default {
 
     const_decl_part: ['sequence', [
       'word:const',
+      'VERIFIED',
       ['one_plus', 'const_decl'],
     ]],
     const_decl: ['sequence', [
@@ -63,6 +64,7 @@ export default {
     ]],
     var_decl_part: ['sequence', [
       'word:var',
+      'VERIFIED',
       ['one_plus', 'var_decl'],
     ]],
     var_decl: ['sequence', [

@@ -1,15 +1,16 @@
+import whileEvaluating from './whileEvaluating'
+import ruleToString from './ruleToString'
 import trace from '@adrianhelvik/trace'
 
 function UnexpectedToken(ctx) {
   const token = ctx.tokens[ctx.index]
-  const type = ctx.rule.value
-    ? `${ctx.rule.type} "${ctx.rule.value}"`
-    : ctx.rule.type
+
   const message = trace(
     ctx.source,
-    ctx.index,
-    `Unexpected token ${token.type} "${token.value}". Expected ${type}.`
+    ctx.tokens[ctx.index].index,
+    `Unexpected ${token.type} "${token.value}". Expected ${ruleToString(ctx.rule)}${whileEvaluating(ctx)}.`
   )
+
   throw Error(message)
 }
 

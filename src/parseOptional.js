@@ -2,10 +2,10 @@ import parseRule from './parseRule'
 
 function parseOptional(ctx) {
   const subCtx = Object.create(ctx)
-  subCtx.optional = true
   subCtx.rule = ctx.rule.subRule
+  subCtx.optional = ctx.optional + 1
 
-  const match = parseRule(subCtx)
+  var match = parseRule(subCtx)
 
   if (! match) {
     return {
