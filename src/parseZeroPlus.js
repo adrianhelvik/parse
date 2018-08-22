@@ -1,19 +1,20 @@
 import parseRule from './parseRule'
 
-function parseSequence(ctx) {
+function parseZeroPlus(ctx) {
   const nodes = []
   let inc = 0
-
-  for (let subRule of ctx.rule.subRule) {
+  
+  while (true) {
     const subCtx = Object.create(ctx)
-    subCtx.rule = subRule
+    subCtx.rule = ctx.rule.subRule
     subCtx.index = ctx.index + inc
+    subCtx.optional = true
+
     const match = parseRule(subCtx)
-    if (! match) {
-      if (ctx.optional)
-        return null
-      throw Error('TODO')
-    }
+
+    if (! match)
+      break
+
     inc += match.inc
     nodes.push(match.value)
   }
@@ -27,4 +28,4 @@ function parseSequence(ctx) {
   }
 }
 
-export default parseSequence
+export default parseZeroPlus
