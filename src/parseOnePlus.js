@@ -9,7 +9,8 @@ function parseOnePlus(ctx) {
     const subCtx = Object.create(ctx)
     subCtx.rule = ctx.rule.subRule
     subCtx.index = ctx.index + inc
-    subCtx.optional += 1
+    if (nodes.length >= 1)
+      subCtx.optional += 1
 
     const match = parseRule(subCtx)
 

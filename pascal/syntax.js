@@ -26,11 +26,11 @@ export default {
     name: ['one', 'word'],
     block: ['sequence', [
       ['optional', 'const_decl_part'],
-      ['optional', 'var_decl_part'],
-      ['optional', ['one_plus', ['either', [ // Changed from one_plus to zero_plus
+      'var_decl_part',
+      ['zero_plus', ['either', [ // Changed from one_plus to zero_plus
         'func_decl',
         'proc_decl',
-      ]]]],
+      ]]],
       'word:begin',
       'stmt_list',
       'word:end',
