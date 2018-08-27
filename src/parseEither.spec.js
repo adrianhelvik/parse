@@ -90,5 +90,5 @@ test('infinite loop condition', () => {
 
   expect(() => {
     parse({ tokens, source, syntax })
-  }).not.toThrow()
+  }).toThrow(/let x = add\(1, 2\)\n.+Infinite recursion/m)
 })
