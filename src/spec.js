@@ -241,7 +241,7 @@ describe('one_plus', () => {
 
     expect(() => {
       parse({ tokens, source, syntax })
-    }).toThrow(/Expected.+one or more one/)
+    }).toThrow(/Unexpected `two` "2". Expected `one`/)
   })
 
   test('when it is optional and there is no match', () => {

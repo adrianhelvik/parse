@@ -1,3 +1,4 @@
+import ExpectedRuleError from './ExpectedRuleError'
 import parseRule from './parseRule'
 import assert from 'assert'
 
@@ -8,6 +9,12 @@ function parseOne(ctx) {
   nextCtx.rule = subRule
 
   const match = parseRule(nextCtx)
+
+  if (! match) {
+    if (ctx.optional)
+      return null
+    throw ExpectedRuleError(ctx)
+  }
 
   assert.equal(typeof match.inc, 'number')
 

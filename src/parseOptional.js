@@ -5,7 +5,7 @@ function parseOptional(ctx) {
   subCtx.rule = ctx.rule.subRule
   subCtx.optional = ctx.optional + 1
 
-  var match = parseRule(subCtx)
+  const match = parseRule(subCtx)
 
   if (! match) {
     return {

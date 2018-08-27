@@ -1,3 +1,4 @@
+import ExpectedRuleError from './ExpectedRuleError'
 import parseRule from './parseRule'
 
 function parseEither(ctx) {
@@ -16,7 +17,9 @@ function parseEither(ctx) {
       }
     }
   }
-  throw Error('TODO')
+  if (! ctx.optional)
+    throw ExpectedRuleError(ctx)
+  return null
 }
 
 export default parseEither

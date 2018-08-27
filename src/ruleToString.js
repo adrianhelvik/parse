@@ -1,6 +1,6 @@
 function ruleToString(rule) {
   if (rule.value)
-    return `${rule.type} "${rule.value}"`
+    return `\`${rule.type}\` "${rule.value}"`
   if (rule.type === 'anonymous') {
     switch (rule.ruleType) {
       case 'optional':
@@ -11,7 +11,7 @@ function ruleToString(rule) {
         return `anonymous ${rule.ruleType}`
     }
   }
-  return rule.type
+  return '`' + rule.type + '`'
 }
 
 export default ruleToString

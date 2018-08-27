@@ -2,14 +2,10 @@ import UnexpectedToken from './UnexpectedToken'
 
 function parseLex(ctx) {
   if (ctx.rule.type !== ctx.tokens[ctx.index].type) {
-    if (ctx.optional)
-      return null
-    throw UnexpectedToken(ctx)
+    return null
   }
   if (ctx.rule.value && ctx.tokens[ctx.index].value !== ctx.rule.value) {
-    if (ctx.optional)
-      return null
-    throw UnexpectedToken(ctx)
+    return null
   }
   return {
     value: ctx.tokens[ctx.index],

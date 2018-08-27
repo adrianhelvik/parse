@@ -8,10 +8,10 @@ function UnexpectedToken(ctx) {
   const message = trace(
     ctx.source,
     ctx.tokens[ctx.index].index,
-    `Unexpected ${token.type} "${token.value}". Expected ${ruleToString(ctx.rule)}${whileEvaluating(ctx)}.`
+    `Unexpected \`${token.type}\` "${token.value}". Expected ${ruleToString(ctx.rule)}${whileEvaluating(ctx.__proto__)}.`
   )
 
-  throw Error(message)
+  return Error(message)
 }
 
 export default UnexpectedToken

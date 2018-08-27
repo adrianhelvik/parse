@@ -2,12 +2,13 @@ export default {
   lex: [
     ['comment', /^\/\*(.|[\s\n])+?\*\//m, 'ignore'],
     ['comment', /^{.+}/m, 'ignore'],
+    ['keyword', /^(array|var|const|begin)(?![a-zA-Z0-9])/],
     ['word', /^[a-zA-Z][a-zA-Z0-9]*/],
     ['numeric_literal', /^[0-9]+/],
     ['char_literal', /^'(('')|[^'])+'/],
     ['char_literal', /^’((’’)|[^’])+’/],
     ['whitespace', /^[\s]+/m, 'ignore'],
-    ['symbol', /^(<=|>=|[.+;=:[\]*()<>])/],
+    ['symbol', /^(\.\.|<=|>=|[.+;=:[\]*()<>])/],
   ],
   parse: {
 
@@ -26,12 +27,12 @@ export default {
     name: ['one', 'word'],
     block: ['sequence', [
       ['optional', 'const_decl_part'],
-      'var_decl_part',
+      ['optional', 'var_decl_part'],
       ['zero_plus', ['either', [ // Changed from one_plus to zero_plus
         'func_decl',
         'proc_decl',
       ]]],
-      'word:begin',
+      'keyword:begin',
       'stmt_list',
       'word:end',
     ]],
@@ -39,7 +40,7 @@ export default {
     // 2.2.1.1
 
     const_decl_part: ['sequence', [
-      'word:const',
+      'keyword:const',
       'VERIFIED',
       ['one_plus', 'const_decl'],
     ]],
@@ -64,12 +65,11 @@ export default {
       'symbol:-',
     ]],
     var_decl_part: ['sequence', [
-      'word:var',
+      'keyword:var',
       'VERIFIED',
       ['one_plus', 'var_decl'],
     ]],
     var_decl: ['sequence', [
-      'VERIFIED',
       'name',
       'symbol::',
       'type',
@@ -77,7 +77,8 @@ export default {
     ]],
     type_name: ['one', 'name'],
     array_type: ['sequence', [
-      'word:array',
+      'keyword:array',
+      'VERIFIED',
       'symbol:[',
       'constant',
       'symbol:..',
@@ -183,7 +184,7 @@ export default {
     // 2.2.2.6
 
     compound_stmt: ['sequence', [
-      'word:begin',
+      'keyword:begin',
       'stmt_list',
       'word:end',
     ]],
@@ -246,6 +247,10 @@ export default {
       'word:not',
       'factor',
     ]],
-    type: ['one', 'word'],
+    type: ['either', [
+      'array_type',
+      'word:Boolean',
+      'word:integer',
+    ]],
   }
 }

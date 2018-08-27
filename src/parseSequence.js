@@ -1,4 +1,5 @@
 import SequenceTerminatedError from './SequenceTerminatedError'
+import ruleToString from './ruleToString'
 import parseRule from './parseRule'
 
 function parseSequence(ctx) {
@@ -14,13 +15,14 @@ function parseSequence(ctx) {
     }
     subCtx.rule = subRule
     subCtx.index = ctx.index + inc
-    if (verified)
+    if (verified) {
       subCtx.optional = 0
+    }
     const match = parseRule(subCtx)
     if (! match) {
-      if (subCtx.optional)
+      if (subCtx.optional > 0)
         return null
-      throw SequenceTerminatedError(subCtx)
+      throw SequenceTerminatedError(subCtx, nodes)
     }
     inc += match.inc
     nodes.push(match.value)
