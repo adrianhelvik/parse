@@ -1,6 +1,6 @@
 {
   "name": "@adrianhelvik/parse",
-  "version": "5.0.3",
+  "version": "5.0.4",
   "main": "dist/index.js",
   "license": "MIT",
   "private": false,
@@ -21,8 +21,8 @@
     "prepublishOnly": "npm run test && npm run build"
   },
   "dependencies": {
-    "@adrianhelvik/convert-syntax": "^2.0.1",
-    "@adrianhelvik/trace": "^4.0.0",
+    "@adrianhelvik/convert-syntax": "*",
+    "@adrianhelvik/trace": "*",
     "circular-json": "^0.5.5"
   },
   "jest": {
