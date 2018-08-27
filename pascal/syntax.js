@@ -2,19 +2,20 @@ export default {
   lex: [
     ['comment', /^\/\*(.|[\s\n])+?\*\//m, 'ignore'],
     ['comment', /^{.+}/m, 'ignore'],
-    ['word', /^[a-zA-Z][a-zA-Z0-9]*/],
+    ['keyword', /^(procedure|function|program|begin|end|const|var|array|of|if|then|else|while|do|or|div|mod|and|not)(?![a-zA-Z0-9])/],
+    ['name', /^[a-zA-Z][a-zA-Z0-9]*/],
     ['numeric_literal', /^[0-9]+/],
     ['char_literal', /^'(('')|[^'])+'/],
     ['char_literal', /^’((’’)|[^’])+’/],
     ['whitespace', /^[\s]+/m, 'ignore'],
-    ['symbol', /^(<=|>=|[.+;=:[\]*()<>])/],
+    ['symbol', /^(<=|>=|\.\.|:=|[.+;=:[\]*()<>])/],
   ],
   parse: {
 
     // 2.2
 
     main: ['sequence', [
-      'word:program',
+      'keyword:program',
       'name',
       'symbol:;',
       'block',
@@ -23,30 +24,30 @@ export default {
 
     // 2.2.1
 
-    name: ['one', 'word'],
     block: ['sequence', [
       ['optional', 'const_decl_part'],
-      'var_decl_part',
+      ['optional', 'var_decl_part'],
       ['zero_plus', ['either', [ // Changed from one_plus to zero_plus
         'func_decl',
         'proc_decl',
       ]]],
-      'word:begin',
+      'keyword:begin',
+      'VERIFIED',
       'stmt_list',
-      'word:end',
+      'keyword:end',
     ]],
 
     // 2.2.1.1
 
     const_decl_part: ['sequence', [
-      'word:const',
+      'keyword:const',
       'VERIFIED',
       ['one_plus', 'const_decl'],
     ]],
     const_decl: ['sequence', [
       'name',
-      'VERIFIED',
       'symbol:=',
+      'VERIFIED',
       'constant',
       'symbol:;',
     ]],
@@ -64,33 +65,34 @@ export default {
       'symbol:-',
     ]],
     var_decl_part: ['sequence', [
-      'word:var',
+      'keyword:var',
       'VERIFIED',
       ['one_plus', 'var_decl'],
     ]],
     var_decl: ['sequence', [
-      'VERIFIED',
       'name',
       'symbol::',
+      'VERIFIED',
       'type',
       'symbol:;',
     ]],
     type_name: ['one', 'name'],
     array_type: ['sequence', [
-      'word:array',
+      'keyword:array',
+      'VERIFIED',
       'symbol:[',
       'constant',
       'symbol:..',
       'constant',
       'symbol:]',
-      'word:of',
+      'keyword:of',
       'type',
     ]],
 
     // 2.2.1.3
 
     func_decl: ['sequence', [
-      'word:function',
+      'keyword:function',
       'name',
       ['optional', 'param_decl_list'],
       'symbol::',
@@ -100,7 +102,8 @@ export default {
       'symbol:;',
     ]],
     proc_decl: ['sequence', [
-      'word:procedure',
+      'keyword:procedure',
+      'VERIFIED',
       'name',
       ['optional', 'param_decl_list'],
       'symbol:;',
@@ -132,13 +135,14 @@ export default {
 
     // 2.2.2.1
 
-    empty_stmt: ['sequence', ['symbol:;']],
+    empty_stmt: ['one', 'symbol:;'],
 
     // 2.2.2.2
 
     assign_stmt: ['sequence', [
       'variable',
       'symbol::=',
+      'VERIFIED',
       'expression',
     ]],
     variable: ['sequence', [
@@ -161,12 +165,12 @@ export default {
     // 2.2.2.4
 
     if_stmt: ['sequence', [
-      'word:if',
+      'keyword:if',
       'expression',
-      'word:then',
+      'keyword:then',
       'statement',
       ['optional', ['sequence', [
-        'word:else',
+        'keyword:else',
         'statement',
       ]]],
     ]],
@@ -174,18 +178,19 @@ export default {
     // 2.2.2.5
 
     while_stmt: ['sequence', [
-      'word:while',
+      'keyword:while',
       'expression',
-      'word:do',
+      'keyword:do',
       'statement',
     ]],
 
     // 2.2.2.6
 
     compound_stmt: ['sequence', [
-      'word:begin',
+      'keyword:begin',
+      'VERIFIED',
       'stmt_list',
-      'word:end',
+      'keyword:end',
     ]],
 
     // 2.2.3
@@ -210,7 +215,7 @@ export default {
     term_opr: ['either', [
       'symbol:+',
       'symbol:-',
-      'word:or',
+      'keyword:or',
     ]],
     term: ['one_plus', 'factor', 'factor_opr'],
 
@@ -218,9 +223,9 @@ export default {
 
     factor_opr: ['either', [
       'symbol:*',
-      'word:div',
-      'word:mod',
-      'word:and',
+      'keyword:div',
+      'keyword:mod',
+      'keyword:and',
     ]],
     factor: ['either', [
       'unsigned_constant',
@@ -243,9 +248,12 @@ export default {
       'symbol:)',
     ]],
     negation: ['sequence', [
-      'word:not',
+      'keyword:not',
       'factor',
     ]],
-    type: ['one', 'word'],
+    type: ['either', [
+      'array_type',
+      'name',
+    ]],
   }
 }

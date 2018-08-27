@@ -6,6 +6,8 @@ function parseSequence(ctx) {
   let inc = 0
   let verified = false
 
+  ctx.partialMatch = { nodes, ctx }
+
   for (let subRule of ctx.rule.subRule) {
     const subCtx = Object.create(ctx)
     if (subRule.ruleType === 'verified') {
@@ -14,13 +16,12 @@ function parseSequence(ctx) {
     }
     subCtx.rule = subRule
     subCtx.index = ctx.index + inc
-    if (verified)
-      subCtx.optional = 0
     const match = parseRule(subCtx)
     if (! match) {
-      if (subCtx.optional)
+      if (subCtx.optional && ! verified) {
         return null
-      throw SequenceTerminatedError(subCtx)
+      }
+      throw SequenceTerminatedError(subCtx, nodes)
     }
     inc += match.inc
     nodes.push(match.value)

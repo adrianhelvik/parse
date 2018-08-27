@@ -4,7 +4,9 @@ import parseRule from './parseRule'
 function parseOnePlus(ctx) {
   const nodes = []
   let inc = 0
-  
+
+  const delimiter = ctx.rule.delimiter
+
   while (true) {
     const subCtx = Object.create(ctx)
     subCtx.rule = ctx.rule.subRule
@@ -15,13 +17,30 @@ function parseOnePlus(ctx) {
     const match = parseRule(subCtx)
 
     if (! match) {
-      if (! nodes.length)
+      if (! nodes.length) {
+        if (ctx.optional > 0)
+          return null
         throw ExpectedRuleError(ctx)
+      }
       break
     }
 
     inc += match.inc
     nodes.push(match.value)
+
+    if (ctx.rule.delimiter) {
+      const delimCtx = Object.create(ctx)
+      delimCtx.rule = ctx.rule.delimiter
+      delimCtx.index = ctx.index + inc
+      delimCtx.optional = ctx.optional + 1
+      const delimiterMatch = parseRule(delimCtx)
+
+      if (! delimiterMatch)
+        break
+
+      inc += delimiterMatch.inc
+      nodes.push(delimiterMatch.value)
+    }
   }
 
   return {
