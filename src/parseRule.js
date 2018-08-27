@@ -1,3 +1,4 @@
+import InfiniteRecursionError from './InfiniteRecursionError'
 import parseOptional from './parseOptional'
 import parseZeroPlus from './parseZeroPlus'
 import parseSequence from './parseSequence'
@@ -10,6 +11,11 @@ import assert from 'assert'
 function parseRule(ctx) {
   assert.equal(typeof ctx.optional, 'number')
   assert(! isNaN(ctx.optional))
+
+  ctx.recursionDepth = ctx.recursionDepth + 1 || 1
+
+  if (ctx.recursionDepth > 1000)
+    throw InfiniteRecursionError(ctx)
 
   switch (ctx.rule.ruleType) {
     case 'one':
