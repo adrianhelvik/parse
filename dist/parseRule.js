@@ -38,6 +38,10 @@ var _parseLex = require('./parseLex');
 
 var _parseLex2 = _interopRequireDefault(_parseLex);
 
+var _parseAll = require('./parseAll');
+
+var _parseAll2 = _interopRequireDefault(_parseAll);
+
 var _assert = require('assert');
 
 var _assert2 = _interopRequireDefault(_assert);
@@ -67,6 +71,8 @@ function parseRule(ctx) {
       return (0, _parseOnePlus2.default)(ctx);
     case 'zero_plus':
       return (0, _parseZeroPlus2.default)(ctx);
+    case 'all':
+      return (0, _parseAll2.default)(ctx);
     default:
       break;
   }

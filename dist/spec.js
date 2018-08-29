@@ -215,3 +215,39 @@ describe('one_plus', function () {
     });
   });
 });
+
+it('can parse all tokens', function () {
+  var syntax = {
+    lex: [['one', /^1/], ['two', /^2/]],
+    parse: {
+      main: ['all', ['sequence', ['one', 'two', 'one']]]
+    }
+  };
+  var source = '121';
+  var tokens = (0, _lex2.default)({ source: source, syntax: syntax });
+  var ast = (0, _2.default)({ tokens: tokens, source: source, syntax: syntax });
+
+  expect(ast).toEqual({
+    type: 'main',
+    node: {
+      type: 'anonymous',
+      nodes: [{ type: 'one', value: '1', index: 0 }, { type: 'two', value: '2', index: 1 }, { type: 'one', value: '1', index: 2 }]
+    }
+  });
+});
+
+it('throws an error when the end is not reached with the all rule', function () {
+  var syntax = {
+    lex: [['one', /^1/], ['two', /^2/], ['word', /^x/]],
+    parse: {
+      main: ['all', ['zero_plus', 'number']],
+      number: ['either', ['one', 'two']]
+    }
+  };
+  var source = '121x';
+  var tokens = (0, _lex2.default)({ source: source, syntax: syntax });
+
+  expect(function () {
+    (0, _2.default)({ tokens: tokens, source: source, syntax: syntax });
+  }).toThrow(/Expected end of source. Got word "x" while evaluating main./);
+});

@@ -6,6 +6,7 @@ import parseOnePlus from './parseOnePlus'
 import parseEither from './parseEither'
 import parseOne from './parseOne'
 import parseLex from './parseLex'
+import parseAll from './parseAll'
 import assert from 'assert'
 
 function parseRule(ctx) {
@@ -32,6 +33,8 @@ function parseRule(ctx) {
       return parseOnePlus(ctx)
     case 'zero_plus':
       return parseZeroPlus(ctx)
+    case 'all':
+      return parseAll(ctx)
     default:
       break
   }

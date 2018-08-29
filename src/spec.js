@@ -269,3 +269,54 @@ describe('one_plus', () => {
     })
   })
 })
+
+it('can parse all tokens', () => {
+  const syntax = {
+    lex: [
+      ['one', /^1/],
+      ['two', /^2/],
+    ],
+    parse: {
+      main: ['all', ['sequence', [
+        'one',
+        'two',
+        'one',
+      ]]],
+    },
+  }
+  const source = '121'
+  const tokens = lex({ source, syntax })
+  const ast = parse({ tokens, source, syntax })
+
+  expect(ast).toEqual({
+    type: 'main',
+    node: {
+      type: 'anonymous',
+      nodes: [
+        { type: 'one', value: '1', index: 0 },
+        { type: 'two', value: '2', index: 1 },
+        { type: 'one', value: '1', index: 2 },
+      ]
+    }
+  })
+})
+
+it('throws an error when the end is not reached with the all rule', () => {
+  const syntax = {
+    lex: [
+      ['one', /^1/],
+      ['two', /^2/],
+      ['word', /^x/],
+    ],
+    parse: {
+      main: ['all', ['zero_plus', 'number']],
+      number: ['either', ['one', 'two']],
+    },
+  }
+  const source = '121x'
+  const tokens = lex({ source, syntax })
+
+  expect(() => {
+    parse({ tokens, source, syntax })
+  }).toThrow(/Expected end of source. Got word "x" while evaluating main./)
+})
